@@ -102,21 +102,22 @@ function Scene() {
 }
 
 /* Movimento: valores compartilhados */
-const SPRING = { type: 'spring', stiffness: 90, damping: 18, mass: 0.9 } as const
+const SPRING = { type: 'spring', stiffness: 70, damping: 16, mass: 1 } as const
 const EASE_OUT = [0.22, 1, 0.36, 1] as const
 
 /* Revela elementos ao rolar a página (mola + desfoque). Mantém a classe "in" para as animações CSS internas. */
-function Reveal({ children, className = '', delay = 0, as = 'div' }: { children: ReactNode; className?: string; delay?: number; as?: 'div' | 'li' | 'section' }) {
+function Reveal({ children, className = '', delay = 0, as = 'div', from = 'up' }: { children: ReactNode; className?: string; delay?: number; as?: 'div' | 'li' | 'section'; from?: 'up' | 'left' | 'right' }) {
   const reduce = useReducedMotion()
-  const [on, setOn] = useState(!!reduce)
+  const [on, setOn] = useState(false)
+  const start = reduce ? { opacity: 0 } : { opacity: 0, x: from === 'left' ? -120 : from === 'right' ? 120 : 0, y: from === 'up' ? 90 : 30, scale: 0.9, rotate: from === 'left' ? -3 : from === 'right' ? 3 : 0, filter: 'blur(14px)' }
   const Tag = as === 'li' ? motion.li : as === 'section' ? motion.section : motion.div
   return (
     <Tag
       className={`reveal${on ? ' in' : ''} ${className}`}
-      initial={reduce ? false : { opacity: 0, y: 44, scale: 0.97, filter: 'blur(8px)' }}
-      whileInView={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
-      viewport={{ once: true, amount: 0.2, margin: '0px 0px -8% 0px' }}
-      transition={{ ...SPRING, delay: delay / 1000, filter: { duration: 0.6, ease: EASE_OUT, delay: delay / 1000 } }}
+      initial={start}
+      whileInView={{ opacity: 1, x: 0, y: 0, scale: 1, rotate: 0, filter: 'blur(0px)' }}
+      viewport={{ once: true, amount: 0.15 }}
+      transition={reduce ? { duration: 0.6, delay: delay / 1000 } : { ...SPRING, delay: delay / 1000, opacity: { duration: 0.7, delay: delay / 1000 }, filter: { duration: 0.8, ease: EASE_OUT, delay: delay / 1000 } }}
       onViewportEnter={() => setOn(true)}
     >{children}</Tag>
   )
@@ -125,13 +126,12 @@ function Reveal({ children, className = '', delay = 0, as = 'div' }: { children:
 /* Título de seção que entra palavra por palavra */
 function Words({ text, className = 'h2x' }: { text: string; className?: string }) {
   const reduce = useReducedMotion()
-  if (reduce) return <h2 className={className}>{text}</h2>
   return (
     <motion.h2 className={className} initial="hide" whileInView="show" viewport={{ once: true, amount: 0.6 }}
-      transition={{ staggerChildren: 0.055, delayChildren: 0.08 }}>
+      transition={{ staggerChildren: 0.09, delayChildren: 0.1 }}>
       {text.split(' ').map((w, i) => (
         <motion.span key={i} style={{ display: 'inline-block', whiteSpace: 'pre' }}
-          variants={{ hide: { opacity: 0, y: '0.6em', rotate: 3 }, show: { opacity: 1, y: 0, rotate: 0, transition: SPRING } }}>
+          variants={reduce ? { hide: { opacity: 0 }, show: { opacity: 1, transition: { duration: 0.4 } } } : { hide: { opacity: 0, y: '1.1em', rotate: 8, scale: 0.8, filter: 'blur(6px)' }, show: { opacity: 1, y: 0, rotate: 0, scale: 1, filter: 'blur(0px)', transition: SPRING } }}>
           {w + ' '}
         </motion.span>
       ))}
@@ -150,8 +150,8 @@ function ScrollProgress() {
 function Unfold({ children, className }: { children: ReactNode; className: string }) {
   const ref = useRef<HTMLElement>(null)
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'start 35%'] })
-  const scale = useTransform(scrollYProgress, [0, 1], [0.92, 1])
-  const radius = useTransform(scrollYProgress, [0, 1], [48, 0])
+  const scale = useTransform(scrollYProgress, [0, 1], [0.8, 1])
+  const radius = useTransform(scrollYProgress, [0, 1], [80, 0])
   return <motion.section ref={ref} className={className} style={{ scale, borderRadius: radius }}>{children}</motion.section>
 }
 
@@ -160,10 +160,11 @@ function HeroScene() {
   const ref = useRef<HTMLDivElement>(null)
   const reduce = useReducedMotion()
   const mx = useMotionValue(0), my = useMotionValue(0)
-  const rotY = useSpring(useTransform(mx, [-0.5, 0.5], [-7, 7]), { stiffness: 120, damping: 16 })
-  const rotX = useSpring(useTransform(my, [-0.5, 0.5], [6, -6]), { stiffness: 120, damping: 16 })
+  const rotY = useSpring(useTransform(mx, [-0.5, 0.5], [-12, 12]), { stiffness: 120, damping: 16 })
+  const rotX = useSpring(useTransform(my, [-0.5, 0.5], [10, -10]), { stiffness: 120, damping: 16 })
   const { scrollY } = useScroll()
-  const y = useTransform(scrollY, [0, 700], [0, 110])
+  const y = useTransform(scrollY, [0, 700], [0, 220])
+  const sc = useTransform(scrollY, [0, 700], [1, 0.86])
   const op = useTransform(scrollY, [0, 600], [1, 0.35])
   function move(e: React.PointerEvent) {
     if (reduce || e.pointerType !== 'mouse') return
@@ -174,7 +175,7 @@ function HeroScene() {
     <motion.div ref={ref} className="hero2-scene" onPointerMove={move} onPointerLeave={() => { mx.set(0); my.set(0) }}
       initial={{ opacity: 0, y: 60, scale: 0.94 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ ...SPRING, delay: 0.3 }}
       style={{ perspective: 1200 }}>
-      <motion.div style={{ rotateX: rotX, rotateY: rotY, y: reduce ? 0 : y, opacity: reduce ? 1 : op, transformStyle: 'preserve-3d' }}>
+      <motion.div style={{ rotateX: rotX, rotateY: rotY, y: reduce ? 0 : y, scale: reduce ? 1 : sc, opacity: reduce ? 1 : op, transformStyle: 'preserve-3d' }}>
         <Scene />
       </motion.div>
     </motion.div>
@@ -184,8 +185,8 @@ function HeroScene() {
 /* Formas do fundo do hero com parallax em velocidades diferentes */
 function HeroBg() {
   const { scrollY } = useScroll()
-  const slow = useTransform(scrollY, [0, 800], [0, -120])
-  const fast = useTransform(scrollY, [0, 800], [0, -260])
+  const slow = useTransform(scrollY, [0, 800], [0, -200])
+  const fast = useTransform(scrollY, [0, 800], [0, -480])
   return (
     <div className="hero-bg" aria-hidden="true">
       {[0, 1, 2, 3, 0, 1, 2, 3].map((k, n) => (
@@ -227,7 +228,7 @@ export default function Home() {
   }, [])
 
   return (
-    <MotionConfig reducedMotion="user">
+    <MotionConfig reducedMotion="never">
     <div className="home">
       <ScrollProgress />
       <header className={`home-header${scrolled ? ' scrolled' : ''}`}>
@@ -280,7 +281,7 @@ export default function Home() {
         <div className="section-in">
           <Reveal><span className="kicker">Como funciona</span><Words text="Do zero ao pódio em três passos" /></Reveal>
           <ol className="steps2">
-            <Reveal as="li" delay={0} className="step2">
+            <Reveal as="li" delay={0} from="left" className="step2">
               <div className="mock mock-editor">
                 <div className="me-title">Revisão de quinta</div>
                 <div className="me-q">Qual é a capital do RN?</div>
@@ -299,7 +300,7 @@ export default function Home() {
               <span className="step2-n">2</span><h3>Projete o PIN</h3>
               <p>Abra a sala no telão. A turma entra pelo QR code ou digitando o PIN no celular.</p>
             </Reveal>
-            <Reveal as="li" delay={240} className="step2">
+            <Reveal as="li" delay={240} from="right" className="step2">
               <div className="mock mock-podium">
                 {[{ n: 'Rafa', p: 2, h: 52 }, { n: 'Lara', p: 1, h: 78 }, { n: 'Ana', p: 3, h: 36 }].map((x) => (
                   <div key={x.n} className={`mpo-col p${x.p}`}><span>{x.n}</span><i style={{ height: x.h }}>{x.p}º</i></div>
@@ -314,7 +315,7 @@ export default function Home() {
 
       <Unfold className="section dark">
         <div className="section-in split">
-          <Reveal className="split-copy">
+          <Reveal className="split-copy" from="left">
             <span className="kicker">Telão e celular sincronizados</span>
             <Words text="Cada toque chega ao telão na hora." />
             <p className="lead2">O celular de quem joga mostra só as cores e formas, em tela cheia, para ninguém perder tempo lendo. O relógio que mede a velocidade é o do servidor, então o placar é justo para todos os aparelhos.</p>
@@ -324,7 +325,7 @@ export default function Home() {
               <li>Apelidos ofensivos são barrados na entrada</li>
             </ul>
           </Reveal>
-          <Reveal className="phones" delay={150}>
+          <Reveal className="phones" delay={150} from="right">
             <div className="phone small p-left"><div className="phone-screen ph-lobby"><strong>Você está dentro!</strong><span>Procure seu apelido no telão.</span></div></div>
             <div className="phone small p-mid"><div className="phone-screen"><div className="ph-grid static">{ANSWER.map((a, k) => <span key={a.key} className={`ph-btn qz-answer--${a.key}`}><Shape index={k} /></span>)}</div></div></div>
             <div className="phone small p-right"><div className="phone-screen ph-result"><div className="ph-verdict">✓</div><strong>Você acertou!</strong><span className="ph-gain">+985</span></div></div>
@@ -334,7 +335,7 @@ export default function Home() {
 
       <section className="section" id="votacoes">
         <div className="section-in poll-feature">
-          <Reveal className="pf-copy">
+          <Reveal className="pf-copy" from="left">
             <span className="kicker">Novo · Votações ao vivo</span>
             <Words text="Sua plateia vota, e o resultado aparece no seu slide." />
             <p className="lead2" style={{ color: 'var(--ink-muted)' }}>Monte uma sequência de perguntas de múltipla escolha ou nuvem de palavras. A plateia vota pelo QR code e o gráfico cresce ao vivo dentro do PowerPoint, enquanto você fala.</p>
@@ -348,7 +349,7 @@ export default function Home() {
               <Link to={session ? '/votacoes' : '/criar-conta'} className="qz-btn qz-btn--primary qz-btn--lg">{session ? 'Criar uma votação' : 'Criar conta grátis'}</Link>
             </div>
           </Reveal>
-          <Reveal className="pf-visual" delay={150}>
+          <Reveal className="pf-visual" delay={150} from="right">
             <div className="pf-slide">
               <div className="pf-bar-top"><span /><span /><span /></div>
               <div className="pf-slide-in">
