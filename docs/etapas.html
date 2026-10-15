@@ -79,8 +79,8 @@ h1{font:800 clamp(30px,6vw,44px)/1.05 var(--display);margin:8px 0 10px;text-wrap
 </div>
 
 <script type="application/json" id="state">
-{"updated":"14/10/2026, 22:05",
-"next":{"you":"Importar o repositório quizuu na Vercel (vercel.com/new) com as duas variáveis do arquivo .env.example e me mandar o endereço gerado.","me":"Configurar o endereço no login do Supabase e começar o editor de quiz (Fase 4)."},
+{"updated":"14/10/2026, 22:20",
+"next":{"you":"Rodar o SQL do editor no Supabase (aprovando o pedido ou colando no SQL Editor).","me":"Testar o editor de ponta a ponta e começar a sala ao vivo (Fase 5)."},
 "phases":[
 {"title":"Decisões e fundação","desc":"Fechar os pontos abertos e preparar o ambiente onde tudo vai rodar.","note":"Repositório criado e organizado com especificação e esquema do banco. Projeto Supabase Quizuu conectado (São Paulo).","ready":"ambiente pronto e decisões de produto tomadas.","tasks":[
  {"t":"Criar repositório no GitHub (glebeduarte/quizuu)","s":"done"},
@@ -93,17 +93,17 @@ h1{font:800 clamp(30px,6vw,44px)/1.05 var(--display);margin:8px 0 10px;text-wrap
  {"t":"Escrever o esquema (quizzes, perguntas, opções, salas, jogadores, respostas)","s":"done"},
  {"t":"Aplicar o esquema no Supabase","s":"done"},
  {"t":"Ativar regras de acesso (RLS) e conferir alertas","s":"done"},
- {"t":"Criar área de arquivos para imagens das perguntas","s":"todo"}]},
-{"title":"Esqueleto do app e login","desc":"Projeto React publicado, com login do organizador e as três telas base.","note":"App pronto e compilando sem erros. Falta só importar na Vercel, que precisa ser feito pela sua conta.","ready":"organizador entra com e-mail e vê o painel vazio.","tasks":[
+ {"t":"Criar área de arquivos para imagens das perguntas","s":"doing"}]},
+{"title":"Esqueleto do app e login","desc":"Projeto React publicado, com login do organizador e as três telas base.","note":"No ar em quizuu-beryl.vercel.app. O cadastro direto, sem e-mail de verificação, depende do SQL pendente.","ready":"organizador entra com e-mail e vê o painel vazio.","tasks":[
  {"t":"Criar o projeto React no repositório, com as cores e fontes do design system","s":"done"},
- {"t":"Login do organizador por link mágico no e-mail","s":"done"},
+ {"t":"Login do organizador com e-mail e senha, sem verificação","s":"doing"},
  {"t":"Rotas: início, painel, tela do host, tela do jogador","s":"done"},
- {"t":"Publicar na Vercel com domínio provisório","s":"doing"}]},
-{"title":"Criador de quiz","desc":"Montar, editar e organizar quizzes de múltipla escolha.","ready":"um quiz completo criado e salvo pelo painel.","tasks":[
- {"t":"Lista de quizzes do organizador","s":"todo"},
- {"t":"Editor de perguntas (texto, 2 a 4 opções, correta, tempo, pontos)","s":"todo"},
- {"t":"Upload de imagem por pergunta","s":"todo"},
- {"t":"Reordenar, duplicar e excluir perguntas","s":"todo"}]},
+ {"t":"Publicar na Vercel (quizuu-beryl.vercel.app)","s":"done"}]},
+{"title":"Criador de quiz","desc":"Montar, editar e organizar quizzes de múltipla escolha.","note":"Telas prontas e publicadas. Para salvar perguntas e imagens falta rodar o SQL supabase/migrations/20261015000001_editor_e_login.sql.","ready":"um quiz completo criado e salvo pelo painel.","tasks":[
+ {"t":"Lista de quizzes do organizador","s":"done"},
+ {"t":"Editor de perguntas (texto, 2 a 4 opções, correta, tempo, pontos, verdadeiro ou falso)","s":"doing"},
+ {"t":"Upload de imagem por pergunta","s":"doing"},
+ {"t":"Reordenar, duplicar e excluir perguntas","s":"doing"}]},
 {"title":"Sala ao vivo","desc":"PIN, QR code e lobby mostrando quem entrou em tempo real.","ready":"20 celulares entram na mesma sala e aparecem no telão.","tasks":[
  {"t":"Gerar sala com PIN de 6 dígitos e QR code","s":"todo"},
  {"t":"Entrada do jogador por PIN + apelido (filtro de palavrões)","s":"todo"},

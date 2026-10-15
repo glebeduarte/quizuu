@@ -160,3 +160,46 @@ h1, h2, h3 { font-family: var(--font-display); margin: 0; text-wrap: balance; }
 .hero h1 { font-size: clamp(40px, 7vw, 72px); line-height: .98; font-weight: 800; }
 .btn-row { display: flex; flex-wrap: wrap; gap: var(--space-3); }
 .empty { text-align: center; padding: var(--space-12) var(--space-6); display: grid; gap: var(--space-3); justify-items: center; }
+
+/* Painel */
+.quiz-grid { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+.quiz-card { display: grid; gap: var(--space-2); text-decoration: none; color: inherit; transition: transform .1s; }
+.quiz-card:hover { transform: translateY(-2px); }
+.qz-btn--danger { background: var(--wrong); color: var(--on-color); }
+
+/* Editor */
+.editor-top { flex-wrap: wrap; margin-bottom: var(--space-4); }
+.title-input { flex: 1 1 260px; min-width: 0; font: 800 22px/1 var(--font-display); }
+.save-state { font-size: 14px; }
+.editor { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: var(--space-6); align-items: start; }
+@media (max-width: 860px) { .editor { grid-template-columns: 1fr; } .q-list { flex-direction: row; overflow-x: auto; } .q-list .q-item { min-width: 200px; } }
+.q-list { display: flex; flex-direction: column; gap: var(--space-2); }
+.q-item { display: grid; grid-template-columns: 28px minmax(0,1fr) auto; gap: var(--space-2); align-items: center; text-align: left; padding: var(--space-3); border-radius: var(--radius-md); border: 2px solid transparent; background: var(--surface-raised); color: var(--ink-strong); cursor: pointer; font: 600 14px/1.3 var(--font-body); }
+.q-item.is-active { border-color: var(--brand); }
+.q-num { font: 800 16px/1 var(--font-display); color: var(--brand); }
+.q-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.q-warn { width: 20px; height: 20px; border-radius: var(--radius-pill); background: var(--answer-yellow); color: #22103a; font: 800 13px/20px var(--font-display); text-align: center; }
+.q-edit { display: grid; gap: var(--space-6); }
+.q-toolbar { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
+.q-toolbar .h2 { font: 700 20px/1.2 var(--font-display); }
+.q-toolbar .qz-btn { min-height: 40px; padding: 0 var(--space-3); }
+.textarea { min-height: 88px; padding: var(--space-3) var(--space-4); resize: vertical; font: 700 20px/1.35 var(--font-display); }
+select.input { font-size: 16px; }
+.settings { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: var(--space-4); }
+@media (max-width: 560px) { .settings { grid-template-columns: 1fr; } }
+.dropzone { display: grid; place-items: center; min-height: 72px; border: 2px dashed var(--line); border-radius: var(--radius-md); color: var(--ink-muted); cursor: pointer; font-weight: 700; }
+.dropzone:hover { border-color: var(--brand); color: var(--brand); }
+.media { display: flex; align-items: center; gap: var(--space-4); flex-wrap: wrap; }
+.media img { max-height: 160px; border-radius: var(--radius-md); }
+.opt-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: var(--space-3); }
+@media (max-width: 560px) { .opt-grid { grid-template-columns: 1fr; } }
+.opt { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3); border-radius: var(--radius-md); color: var(--on-color); min-height: 64px; }
+.opt.qz-answer--red { background: var(--answer-red); } .opt.qz-answer--orange { background: var(--answer-orange); }
+.opt.qz-answer--yellow { background: var(--answer-yellow); color: #22103a; } .opt.qz-answer--purple { background: var(--answer-purple); }
+.opt-input { flex: 1; min-width: 0; background: transparent; border: 0; color: inherit; font: 700 18px/1.2 var(--font-display); padding: var(--space-2) 0; }
+.opt-input::placeholder { color: inherit; opacity: .65; }
+.opt-input:focus { outline: none; border-bottom: 2px solid currentColor; }
+.opt-check { flex: none; width: 36px; height: 36px; border-radius: var(--radius-pill); border: 3px solid currentColor; background: transparent; cursor: pointer; display: grid; place-items: center; padding: 0; }
+.opt.is-correct .opt-check { background: var(--on-color); border-color: var(--on-color); }
+.opt-check svg { width: 22px; height: 22px; fill: none; stroke: var(--correct); stroke-width: 3.5; }
+.opt-check:focus-visible { outline: 3px solid var(--on-color); outline-offset: 2px; }
