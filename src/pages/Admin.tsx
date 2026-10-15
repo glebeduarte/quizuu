@@ -45,6 +45,9 @@ export default function Admin() {
   const [aberto, setAberto] = useState<string | null>(null)
   const [senha, setSenha] = useState('')
   const [confirmaExcluir, setConfirmaExcluir] = useState<string | null>(null)
+  const [sel, setSel] = useState<Set<string>>(new Set())
+  const [confirmaLote, setConfirmaLote] = useState(false)
+  const [excluindo, setExcluindo] = useState(false)
 
   async function carregar() {
     const { data, error } = await supabase.rpc('admin_overview')
@@ -87,6 +90,25 @@ export default function Admin() {
     setConfirmaExcluir(null)
     if (error) { setErro('Não foi possível excluir o usuário.'); return }
     setAviso(`Conta ${u.email} excluída.`)
+    carregar()
+  }
+
+  function marcar(id: string) {
+    setSel((x) => { const n = new Set(x); if (n.has(id)) n.delete(id); else n.add(id); return n })
+    setConfirmaLote(false)
+  }
+
+  async function excluirLote() {
+    setAviso(''); setErro(''); setExcluindo(true)
+    const ids = [...sel].filter((id) => id !== session?.user.id)
+    let falhas = 0
+    for (const id of ids) {
+      const { error } = await supabase.rpc('admin_delete_user', { p_user: id })
+      if (error) falhas++
+    }
+    setExcluindo(false); setConfirmaLote(false); setSel(new Set())
+    if (falhas) setErro(`${falhas} ${falhas === 1 ? 'conta não pôde ser excluída' : 'contas não puderam ser excluídas'}.`)
+    if (ids.length - falhas > 0) setAviso(`${ids.length - falhas} ${ids.length - falhas === 1 ? 'conta excluída' : 'contas excluídas'}.`)
     carregar()
   }
 
@@ -196,21 +218,45 @@ export default function Admin() {
                 </select>
               </div>
             </div>
+            {sel.size > 0 && (
+              <div className="admin-lote" role="region" aria-label="Ações para as contas selecionadas">
+                <strong>{sel.size} {sel.size === 1 ? 'conta selecionada' : 'contas selecionadas'}</strong>
+                {confirmaLote ? <>
+                  <span>Excluir {sel.size === 1 ? 'esta conta' : 'estas contas'} e tudo o que criaram? Não dá para desfazer.</span>
+                  <button className="qz-btn qz-btn--secondary" onClick={() => setConfirmaLote(false)} disabled={excluindo}>Cancelar</button>
+                  <button className="qz-btn qz-btn--danger" onClick={excluirLote} disabled={excluindo}>{excluindo ? 'Excluindo…' : 'Confirmar exclusão'}</button>
+                </> : <>
+                  <button className="qz-btn qz-btn--danger" onClick={() => setConfirmaLote(true)}>Excluir selecionadas</button>
+                  <button className="qz-btn qz-btn--ghost" onClick={() => setSel(new Set())}>Limpar seleção</button>
+                </>}
+              </div>
+            )}
             <div className="card" style={{ padding: 0, overflowX: 'auto' }}>
               <table className="admin-tabela">
                 <thead><tr>
+                  <th><input type="checkbox" aria-label="Selecionar todas as contas listadas"
+                    checked={usuarios.filter((u) => u.id !== session?.user.id).length > 0 && usuarios.filter((u) => u.id !== session?.user.id).every((u) => sel.has(u.id))}
+                    onChange={(e) => { setConfirmaLote(false); setSel(e.target.checked ? new Set(usuarios.filter((u) => u.id !== session?.user.id).map((u) => u.id)) : new Set()) }} /></th>
                   <th>E-mail</th><th>Criada</th><th>Último acesso</th><th>Quizzes</th><th>Partidas</th><th>Jogadores</th><th>Votações</th><th>Votos</th><th>IA</th><th></th>
                 </tr></thead>
                 <tbody>
                   {usuarios.map((u) => (<Fragment key={u.id}>
                     <tr key={u.id}>
+                      <td>{u.id !== session?.user.id && <input type="checkbox" aria-label={`Selecionar ${u.email}`} checked={sel.has(u.id)} onChange={() => marcar(u.id)} />}</td>
                       <td><strong>{u.email}</strong>{u.admin && <span className="admin-tag">admin</span>}</td>
                       <td>{data(u.criado)}</td><td>{data(u.ultimo_login)}</td>
                       <td>{u.quizzes}</td><td>{u.partidas}</td><td>{u.jogadores}</td><td>{u.votacoes}</td><td>{u.votos}</td><td>{u.ia}</td>
-                      <td><button className="qz-btn qz-btn--ghost" onClick={() => { setAberto(aberto === u.id ? null : u.id); setSenha(''); setConfirmaExcluir(null) }}>{aberto === u.id ? 'Fechar' : 'Gerenciar'}</button></td>
+                      <td className="btn-row" style={{ flexWrap: 'nowrap' }}>
+                        <button className="qz-btn qz-btn--ghost" onClick={() => { setAberto(aberto === u.id ? null : u.id); setSenha(''); setConfirmaExcluir(null) }}>{aberto === u.id ? 'Fechar' : 'Gerenciar'}</button>
+                        {u.id !== session?.user.id && (
+                          <button className="qz-btn qz-btn--ghost icon-btn" aria-label={`Excluir ${u.email}`} title="Excluir conta" onClick={() => { setAberto(u.id); setConfirmaExcluir(u.id) }}>
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6" /></svg>
+                          </button>
+                        )}
+                      </td>
                     </tr>
                     {aberto === u.id && (
-                      <tr key={u.id + '-a'} className="admin-acoes"><td colSpan={10}>
+                      <tr key={u.id + '-a'} className="admin-acoes"><td colSpan={11}>
                         <div className="admin-acoes__in">
                           <div className="btn-row" style={{ alignItems: 'center' }}>
                             <label htmlFor={'s' + u.id}>Nova senha</label>
