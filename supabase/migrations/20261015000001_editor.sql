@@ -1,4 +1,5 @@
--- Quizuu · editor de quiz, imagens e login sem verificação de e-mail
+-- Quizuu · editor de quiz e imagens
+-- Login sem verificação: desligar "Confirm email" em Authentication > Sign In / Providers > Email
 -- Só adições: nada é apagado.
 
 -- 1. Salva o quiz inteiro numa transação, respeitando as regras de acesso
@@ -40,14 +41,3 @@ create policy "organizador envia imagens" on storage.objects for insert to authe
   with check (bucket_id = 'midia' and (storage.foldername(name))[1] = (select auth.uid())::text);
 create policy "organizador apaga imagens" on storage.objects for delete to authenticated
   using (bucket_id = 'midia' and (storage.foldername(name))[1] = (select auth.uid())::text);
-
--- 3. Cadastro sem verificação de e-mail: o organizador já entra confirmado
-create or replace function public.auto_confirm_user() returns trigger
-language plpgsql security definer set search_path = '' as $$
-begin
-  new.email_confirmed_at := coalesce(new.email_confirmed_at, now());
-  return new;
-end $$;
-revoke execute on function public.auto_confirm_user() from public, anon, authenticated;
-create trigger auto_confirm_user before insert on auth.users
-  for each row execute function public.auto_confirm_user();
