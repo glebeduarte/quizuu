@@ -14,6 +14,8 @@ export default function Painel() {
   const [creating, setCreating] = useState(false)
   const [partidas, setPartidas] = useState<Partida[]>([])
   const [error, setError] = useState('')
+  const [confirmId, setConfirmId] = useState<string | null>(null)
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     supabase.from('quizzes').select('id,title,updated_at,questions(count)').order('updated_at', { ascending: false })
@@ -39,6 +41,15 @@ export default function Painel() {
       if (error && error.code !== '23505') break
     }
     setError('Não foi possível abrir a sala. Tente de novo.')
+  }
+
+  async function excluir(id: string) {
+    setDeleting(true); setError('')
+    const { error } = await supabase.from('quizzes').delete().eq('id', id)
+    setDeleting(false); setConfirmId(null)
+    if (error) { setError('Não foi possível excluir o quiz. Tente de novo.'); return }
+    setQuizzes((qs) => (qs ?? []).filter((q) => q.id !== id))
+    setPartidas((ps) => ps.filter((p) => p.quizzes !== null))
   }
 
   const fmt = (d: string) => new Date(d).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })
@@ -76,10 +87,23 @@ export default function Painel() {
                 <span className="muted" style={{ fontSize: 14 }}>
                   {q.questions[0]?.count ?? 0} perguntas · editado em {fmt(q.updated_at)}
                 </span>
-                <div className="btn-row">
-                  <button className="qz-btn qz-btn--primary" disabled={!q.questions[0]?.count} onClick={() => jogar(q.id)}>Jogar</button>
-                  <Link to={`/quiz/${q.id}`} className="qz-btn qz-btn--secondary" style={{ textDecoration: 'none' }}>Editar</Link>
-                </div>
+                {confirmId === q.id ? (
+                  <div className="confirm-box" role="alert">
+                    <p>Excluir “{q.title}”? As partidas e relatórios deste quiz também serão apagados. Não dá para desfazer.</p>
+                    <div className="btn-row">
+                      <button className="qz-btn qz-btn--secondary" onClick={() => setConfirmId(null)} disabled={deleting}>Cancelar</button>
+                      <button className="qz-btn qz-btn--danger" onClick={() => excluir(q.id)} disabled={deleting}>{deleting ? 'Excluindo…' : 'Excluir quiz'}</button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="btn-row">
+                    <button className="qz-btn qz-btn--primary" disabled={!q.questions[0]?.count} onClick={() => jogar(q.id)}>Jogar</button>
+                    <Link to={`/quiz/${q.id}`} className="qz-btn qz-btn--secondary" style={{ textDecoration: 'none' }}>Editar</Link>
+                    <button className="qz-btn qz-btn--ghost icon-btn" aria-label={`Excluir ${q.title}`} title="Excluir quiz" onClick={() => setConfirmId(q.id)}>
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6" /></svg>
+                    </button>
+                  </div>
+                )}
               </div>
             ))}
           </div>

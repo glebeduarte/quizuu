@@ -34,6 +34,8 @@ export default function Editor() {
   const [saving, setSaving] = useState(false)
   const [notice, setNotice] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null)
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [confirmQuiz, setConfirmQuiz] = useState(false)
+  const [askDeleteIdx, setAskDeleteIdx] = useState<number | null>(null)
 
   useEffect(() => {
     (async () => {
@@ -78,6 +80,17 @@ export default function Editor() {
     const copy: Question = { ...q, id: uid(), options: q.options.map((o) => ({ ...o, id: uid() })) }
     setQuestions((qs) => [...qs.slice(0, current + 1), copy, ...qs.slice(current + 1)]); setCurrent(current + 1); setDirty(true)
   }
+  function removeAt(i: number) {
+    if (questions.length === 1) { setQuestions([newQuestion()]); setCurrent(0); setDirty(true); return }
+    setQuestions((qs) => qs.filter((_, k) => k !== i))
+    setCurrent((c) => (i < c ? c - 1 : Math.min(c, questions.length - 2)))
+    setDirty(true)
+  }
+  async function deleteQuiz() {
+    const { error } = await supabase.from('quizzes').delete().eq('id', id!)
+    if (error) { setNotice({ kind: 'err', text: 'Não foi possível excluir o quiz. Tente de novo.' }); setConfirmQuiz(false); return }
+    setDirty(false); navigate('/painel', { replace: true })
+  }
   function remove() {
     if (questions.length === 1) { setQuestions([newQuestion()]); setDirty(true); return }
     setQuestions((qs) => qs.filter((_, i) => i !== current)); setCurrent(Math.max(0, current - 1)); setDirty(true)
@@ -117,11 +130,26 @@ export default function Editor() {
       <div className="content editor">
         <nav className="q-list" aria-label="Perguntas">
           {questions.map((x, i) => (
-            <button key={x.id} className={`q-item${i === current ? ' is-active' : ''}`} onClick={() => setCurrent(i)}>
-              <span className="q-num">{i + 1}</span>
-              <span className="q-text">{x.prompt.trim() || 'Pergunta sem enunciado'}</span>
-              {allProblems[i].length > 0 && <span className="q-warn" title={allProblems[i].join(', ')}>!</span>}
-            </button>
+            <div key={x.id} className={`q-row${i === current ? ' is-active' : ''}`}>
+              {askDeleteIdx === i ? (
+                <div className="q-confirm">
+                  <span>Excluir a pergunta {i + 1}?</span>
+                  <button className="link-btn" onClick={() => setAskDeleteIdx(null)}>Não</button>
+                  <button className="link-btn danger" onClick={() => { removeAt(i); setAskDeleteIdx(null) }}>Excluir</button>
+                </div>
+              ) : (
+                <>
+                  <button className={`q-item${i === current ? ' is-active' : ''}`} onClick={() => setCurrent(i)}>
+                    <span className="q-num">{i + 1}</span>
+                    <span className="q-text">{x.prompt.trim() || 'Pergunta sem enunciado'}</span>
+                    {allProblems[i].length > 0 && <span className="q-warn" title={allProblems[i].join(', ')}>!</span>}
+                  </button>
+                  <button className="q-del" aria-label={`Excluir pergunta ${i + 1}`} title="Excluir pergunta" onClick={() => setAskDeleteIdx(i)}>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6" /></svg>
+                  </button>
+                </>
+              )}
+            </div>
           ))}
           <button className="qz-btn qz-btn--secondary" onClick={add}>+ Pergunta</button>
         </nav>
@@ -197,6 +225,19 @@ export default function Editor() {
             <p className="muted" style={{ margin: 0, fontSize: 14 }}>Para jogar esta pergunta: {allProblems[current].join(', ')}.</p>
           )}
         </section>
+      </div>
+      <div className="content danger-zone">
+        {confirmQuiz ? (
+          <div className="confirm-box" role="alert">
+            <p>Excluir o quiz “{title || 'Quiz sem título'}” inteiro? As partidas e relatórios dele também serão apagados. Não dá para desfazer.</p>
+            <div className="btn-row">
+              <button className="qz-btn qz-btn--secondary" onClick={() => setConfirmQuiz(false)}>Cancelar</button>
+              <button className="qz-btn qz-btn--danger" onClick={deleteQuiz}>Excluir quiz</button>
+            </div>
+          </div>
+        ) : (
+          <button className="qz-btn qz-btn--ghost danger-link" onClick={() => setConfirmQuiz(true)}>Excluir este quiz</button>
+        )}
       </div>
       <p className="content muted" style={{ fontSize: 14, marginTop: 16 }}>
         {ready ? `Pronto para jogar: ${questions.length} perguntas.` : 'Perguntas com ! ainda não estão prontas para jogar. Você pode salvar mesmo assim.'}

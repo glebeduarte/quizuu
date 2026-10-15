@@ -401,3 +401,21 @@ input[type=range] { accent-color: var(--brand); width: 100%; height: 52px; }
 @keyframes pulseCta { 50% { border-color: var(--answer-yellow); } }
 @media (prefers-reduced-motion: reduce) { .sound-cta { animation: none; } }
 .rank-big { font: 800 96px/1 var(--font-display); color: var(--answer-yellow); animation: pop .4s ease-out; }
+
+/* Exclusão */
+.icon-btn { min-height: 48px; width: 48px; padding: 0; margin-left: auto; color: var(--ink-muted); }
+.icon-btn svg, .q-del svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.icon-btn:hover { color: var(--wrong); }
+.confirm-box { display: grid; gap: var(--space-3); padding: var(--space-3); border-radius: var(--radius-md); background: color-mix(in srgb, var(--wrong) 8%, transparent); border: 1px solid color-mix(in srgb, var(--wrong) 30%, transparent); }
+.confirm-box p { margin: 0; font-size: 14px; line-height: 1.45; }
+.q-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 4px; }
+.q-del { width: 36px; height: 36px; display: grid; place-items: center; border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--ink-muted); cursor: pointer; opacity: .55; transition: opacity .15s, color .15s, background .15s; }
+.q-row:hover .q-del, .q-row.is-active .q-del, .q-del:focus-visible { opacity: 1; }
+.q-del:hover { color: var(--wrong); background: color-mix(in srgb, var(--wrong) 10%, transparent); }
+.q-confirm { grid-column: 1 / -1; display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3); border-radius: var(--radius-md); background: color-mix(in srgb, var(--wrong) 8%, var(--surface-raised)); font: 700 14px/1.2 var(--font-body); }
+.q-confirm span { flex: 1; }
+.link-btn { border: 0; background: none; padding: 4px; font: 800 14px/1 var(--font-body); color: var(--ink-muted); cursor: pointer; }
+.link-btn.danger { color: var(--wrong); }
+@media (max-width: 860px) { .q-row { min-width: 236px; } }
+.danger-zone { margin-top: var(--space-8); padding-top: var(--space-4); border-top: 1px solid var(--line); }
+.danger-link { color: var(--wrong); padding-left: 0; }
