@@ -23,6 +23,17 @@ async function stripe(path: string, params: Record<string, string>) {
   return json
 }
 
+// Aceita o ID do preço (price_) ou do produto (prod_), usando o preço padrão do produto
+async function precoId(): Promise<string> {
+  const id = Deno.env.get('STRIPE_PRICE_ID')!.trim()
+  if (!id.startsWith('prod_')) return id
+  const res = await fetch(`https://api.stripe.com/v1/products/${id}`, { headers: { Authorization: `Bearer ${Deno.env.get('STRIPE_SECRET_KEY')}` } })
+  const prod = await res.json()
+  const preco = typeof prod.default_price === 'string' ? prod.default_price : prod.default_price?.id
+  if (!preco) throw new Error('produto sem preço padrão')
+  return preco
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors })
   if (!Deno.env.get('STRIPE_SECRET_KEY') || !Deno.env.get('STRIPE_PRICE_ID')) return reply(503, { erro: 'stripe_nao_configurado' })
@@ -53,7 +64,7 @@ Deno.serve(async (req) => {
       mode: 'subscription',
       customer,
       client_reference_id: user.id,
-      'line_items[0][price]': Deno.env.get('STRIPE_PRICE_ID')!,
+      'line_items[0][price]': await precoId(),
       'line_items[0][quantity]': '1',
       'subscription_data[metadata][user_id]': user.id,
       allow_promotion_codes: 'true',
