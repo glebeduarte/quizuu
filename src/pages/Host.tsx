@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 export default function Host() {
   return (
     <div className="page on-stage">
-      <header className="topbar"><Link to="/painel" className="wordmark">Quizuu</Link></header>
+      <header className="topbar"><Link to="/painel" className="wordmark"><img src="/logo-wordmark-light.png" alt="Quizuu" /></Link></header>
       <main className="center">
         <div className="qz-pin">
           <span className="qz-pin__label">PIN do jogo</span>

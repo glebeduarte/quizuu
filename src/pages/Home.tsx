@@ -7,7 +7,7 @@ export default function Home() {
   return (
     <div className="page">
       <header className="topbar">
-        <Link to="/" className="wordmark">Quizuu</Link>
+        <Link to="/" className="wordmark"><picture><source srcSet="/logo-wordmark-light.png" media="(prefers-color-scheme: dark)" /><img src="/logo-wordmark.png" alt="Quizuu" /></picture></Link>
         <Link to="/entrar">Sou organizador</Link>
       </header>
       <main className="content hero">

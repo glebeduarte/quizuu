@@ -26,7 +26,7 @@ export default function Login() {
 
   return (
     <div className="page">
-      <header className="topbar"><Link to="/" className="wordmark">Quizuu</Link></header>
+      <header className="topbar"><Link to="/" className="wordmark"><picture><source srcSet="/logo-wordmark-light.png" media="(prefers-color-scheme: dark)" /><img src="/logo-wordmark.png" alt="Quizuu" /></picture></Link></header>
       <main className="narrow card">
         <h1 style={{ fontSize: 32, lineHeight: '38px' }}>Entrar como organizador</h1>
         <p className="muted" style={{ margin: 0 }}>Enviamos um link de acesso para o seu e-mail. Sem senha.</p>

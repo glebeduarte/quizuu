@@ -19,7 +19,7 @@ export default function Jogar() {
 
   return (
     <div className="page on-stage">
-      <header className="topbar"><Link to="/" className="wordmark">Quizuu</Link></header>
+      <header className="topbar"><Link to="/" className="wordmark"><img src="/logo-wordmark-light.png" alt="Quizuu" /></Link></header>
       <main className="narrow">
         <form onSubmit={submit} style={{ display: 'grid', gap: 'var(--space-4)' }}>
           {step === 'pin' ? (

@@ -17,7 +17,7 @@ export default function Painel() {
   return (
     <div className="page">
       <header className="topbar">
-        <Link to="/" className="wordmark">Quizuu</Link>
+        <Link to="/" className="wordmark"><picture><source srcSet="/logo-wordmark-light.png" media="(prefers-color-scheme: dark)" /><img src="/logo-wordmark.png" alt="Quizuu" /></picture></Link>
         <div className="btn-row" style={{ alignItems: 'center' }}>
           <span className="muted" style={{ fontSize: 14 }}>{session?.user.email}</span>
           <button className="qz-btn qz-btn--ghost" onClick={() => supabase.auth.signOut()}>Sair</button>
