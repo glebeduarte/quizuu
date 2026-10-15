@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/auth'
 import { ANSWER, Shape } from '../lib/shapes'
 import { saveQuiz } from '../lib/saveQuiz'
+import AppShell from '../lib/AppShell'
 import { limiteMsg, PRECO } from '../lib/plan'
 
 type Gerada = { enunciado: string; tipo: 'multiple_choice' | 'true_false'; opcoes: string[]; correta: number; tempo: number }
@@ -98,14 +99,10 @@ export default function Gerar() {
   const prontoParaGerar = modo === 'tema' ? tema.trim().length > 2 : !!(material.trim() || arquivo)
 
   return (
-    <div className="page">
-      <header className="topbar">
-        <Link to="/painel" className="qz-btn qz-btn--ghost" style={{ paddingLeft: 0 }}>← Meus quizzes</Link>
-      </header>
-      <main className="content gen">
+    <AppShell title="Gerar com IA">
+      <div className="gen gen--shell">
         <div className="gen-head">
-          <span className="eyebrow">Gerar com IA</span>
-          <h1>Crie um quiz a partir de um tema ou de um material</h1>
+          <h2>Crie um quiz a partir de um tema ou de um material</h2>
           <p className="muted">O Gemini sugere as perguntas. Você revisa, tira o que não serve e ajusta tudo no editor antes de jogar.</p>
         </div>
 
@@ -231,7 +228,7 @@ export default function Gerar() {
           </section>
         )}
         </>}
-      </main>
-    </div>
+      </div>
+    </AppShell>
   )
 }

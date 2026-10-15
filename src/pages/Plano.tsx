@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { PRECO, usePlano } from '../lib/plan'
+import AppShell from '../lib/AppShell'
 
 function Barra({ usado, total, rotulo }: { usado: number; total: number; rotulo: string }) {
   const pct = total ? Math.min(100, (usado / total) * 100) : 0
@@ -46,14 +47,10 @@ export default function Plano() {
   const fim = plano?.assinatura?.fim ? new Date(plano.assinatura.fim).toLocaleDateString('pt-BR') : null
 
   return (
-    <div className="page">
-      <header className="topbar">
-        <Link to="/painel" className="qz-btn qz-btn--ghost" style={{ paddingLeft: 0 }}>← Meus quizzes</Link>
-      </header>
-      <main className="content" style={{ display: 'grid', gap: 'var(--space-6)', alignContent: 'start', maxWidth: 880 }}>
+    <AppShell title="Meu plano">
+      <div style={{ display: 'grid', gap: 'var(--space-6)', maxWidth: 880 }}>
         <div>
-          <span className="eyebrow">Meu plano</span>
-          <h1 style={{ fontSize: 36, margin: '4px 0 0' }}>{!plano ? 'Carregando…' : plano.plan === 'admin' ? 'Administrador' : pro ? 'Você está no Pro' : 'Você está no plano Grátis'}</h1>
+          <h2 style={{ fontSize: 28, margin: 0 }}>{!plano ? 'Carregando…' : plano.plan === 'admin' ? 'Administrador' : pro ? 'Você está no Pro' : 'Você está no plano Grátis'}</h2>
         </div>
         {voltou && !pro && plano && <p className="notice notice--ok">Pagamento recebido. Estamos ativando o seu plano, leva só alguns segundos…</p>}
         {voltou && pro && <p className="notice notice--ok">Tudo certo. O Pro já está ativo na sua conta.</p>}
@@ -63,7 +60,7 @@ export default function Plano() {
           <div className="card" style={{ display: 'grid', gap: 16 }}>
             <Barra rotulo="Quizzes" usado={plano.quizzes} total={plano.limits.quizzes} />
             <Barra rotulo="Votações" usado={plano.votacoes} total={plano.limits.votacoes} />
-            {plano.ia.enabled && <Barra rotulo="Gerações com IA neste mês" usado={plano.ia.used} total={plano.ia.limit} />}
+            {plano.ia.enabled && <Barra rotulo={plano.ia.periodo === 'total' ? 'Gerações com IA para experimentar' : 'Gerações com IA neste mês'} usado={plano.ia.used} total={plano.ia.limit} />}
             {pro && fim && <p className="muted" style={{ margin: 0, fontSize: 14 }}>{plano.assinatura?.cancela ? `Assinatura cancelada. O Pro fica ativo até ${fim}.` : `Próxima cobrança em ${fim}.`}</p>}
           </div>
         )}
@@ -85,7 +82,7 @@ export default function Plano() {
             <p className="muted" style={{ margin: 0, fontSize: 13 }}>Pagamento seguro pelo Stripe. Cancele quando quiser, sem multa.</p>
           </div>
         </div>
-      </main>
-    </div>
+      </div>
+    </AppShell>
   )
 }

@@ -668,3 +668,4 @@ input[type=range] { accent-color: var(--brand); width: 100%; height: 52px; }
 .adm-card { align-content: start; }
 @media (max-width: 600px) { .p-acoes { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; } .p-acao { min-height: 104px; padding: 14px; } .p-acao span { display: none; } .p-hello h2 { font-size: 22px; } }
 .adm-toolbar .input { width: auto; } .adm-toolbar select.input { flex: 0 0 auto; }
+.gen--shell { width: 100%; max-width: 880px; margin: 0; padding: 0; } .gen--shell .gen-head h2 { margin: 0; font-size: 26px; }
