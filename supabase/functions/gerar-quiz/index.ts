@@ -3,7 +3,8 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.45.4'
 
 const DAILY_LIMIT = 20
-const MAX_FILE_BYTES = 8 * 1024 * 1024
+const MAX_FILE_BYTES = 30 * 1024 * 1024
+const GEMINI = 'https://generativelanguage.googleapis.com'
 const FILE_TYPES = ['application/pdf', 'text/plain', 'text/markdown', 'image/png', 'image/jpeg', 'image/webp']
 
 const cors = {
@@ -15,7 +16,7 @@ const reply = (status: number, body: unknown) =>
   new Response(JSON.stringify(body), { status, headers: { ...cors, 'Content-Type': 'application/json' } })
 
 type Input = {
-  tema?: string; material?: string; arquivo?: { nome: string; tipo: string; base64: string }
+  tema?: string; material?: string; arquivo?: { nome: string; tipo: string; path: string }
   quantidade?: number; nivel?: string; publico?: string; tempo?: number; tipo?: 'multiple_choice' | 'true_false' | 'misto'
 }
 
@@ -66,7 +67,7 @@ Deno.serve(async (req) => {
   if (!tema && !material && !arquivo) return reply(400, { erro: 'sem_conteudo' })
   if (arquivo) {
     if (!FILE_TYPES.includes(arquivo.tipo)) return reply(400, { erro: 'tipo_de_arquivo' })
-    if (arquivo.base64.length * 0.75 > MAX_FILE_BYTES) return reply(400, { erro: 'arquivo_grande' })
+    if (!arquivo.path?.startsWith(`${user.id}/`)) return reply(400, { erro: 'entrada_invalida' })
   }
   const quantidade = Math.min(20, Math.max(3, Math.round(input.quantidade ?? 10)))
   const nivel = ['fácil', 'médio', 'difícil'].includes(input.nivel ?? '') ? input.nivel : 'médio'
@@ -89,7 +90,44 @@ Deno.serve(async (req) => {
 
   const parts: Record<string, unknown>[] = [{ text: instrucoes }]
   if (material) parts.push({ text: `MATERIAL:\n${material}` })
-  if (arquivo) parts.push({ inline_data: { mime_type: arquivo.tipo, data: arquivo.base64 } })
+
+  // Arquivo: baixa da área privada e envia ao Gemini pela via de arquivos grandes
+  let geminiFile = ''
+  const limpar = async () => {
+    if (arquivo) await supabase.storage.from('materiais').remove([arquivo.path])
+    if (geminiFile) await fetch(`${GEMINI}/v1beta/${geminiFile}`, { method: 'DELETE', headers: { 'x-goog-api-key': key } }).catch(() => {})
+  }
+  if (arquivo) {
+    const { data: blob, error: dlErr } = await supabase.storage.from('materiais').download(arquivo.path)
+    if (dlErr || !blob) { await limpar(); return reply(400, { erro: 'arquivo_nao_encontrado' }) }
+    if (blob.size > MAX_FILE_BYTES) { await limpar(); return reply(400, { erro: 'arquivo_grande' }) }
+    const start = await fetch(`${GEMINI}/upload/v1beta/files`, {
+      method: 'POST',
+      headers: {
+        'x-goog-api-key': key, 'X-Goog-Upload-Protocol': 'resumable', 'X-Goog-Upload-Command': 'start',
+        'X-Goog-Upload-Header-Content-Length': String(blob.size), 'X-Goog-Upload-Header-Content-Type': arquivo.tipo,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ file: { display_name: (arquivo.nome || 'material').slice(0, 100) } }),
+    })
+    const uploadUrl = start.headers.get('x-goog-upload-url')
+    if (!uploadUrl) { console.error('gemini upload start', start.status, await start.text()); await limpar(); return reply(502, { erro: 'falha_ia' }) }
+    const up = await fetch(uploadUrl, {
+      method: 'POST',
+      headers: { 'Content-Length': String(blob.size), 'X-Goog-Upload-Offset': '0', 'X-Goog-Upload-Command': 'upload, finalize' },
+      body: blob,
+    })
+    const info = await up.json().catch(() => null)
+    geminiFile = info?.file?.name ?? ''
+    let state = info?.file?.state, uri = info?.file?.uri
+    for (let i = 0; state === 'PROCESSING' && i < 30; i++) {
+      await new Promise((r) => setTimeout(r, 2000))
+      const st = await (await fetch(`${GEMINI}/v1beta/${geminiFile}`, { headers: { 'x-goog-api-key': key } })).json()
+      state = st.state; uri = st.uri
+    }
+    if (!uri || state === 'FAILED' || state === 'PROCESSING') { console.error('gemini file', state); await limpar(); return reply(502, { erro: 'falha_ia' }) }
+    parts.push({ file_data: { mime_type: arquivo.tipo, file_uri: uri } })
+  }
 
   // Tenta o modelo principal e, se estiver sobrecarregado, um reserva mais leve
   const models = [Deno.env.get('GEMINI_MODEL') || 'gemini-flash-latest', 'gemini-flash-lite-latest']
@@ -100,7 +138,7 @@ Deno.serve(async (req) => {
   let res: Response | null = null
   outer: for (const model of models) {
     for (let attempt = 0; attempt < 2; attempt++) {
-      res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+      res = await fetch(`${GEMINI}/v1beta/models/${model}:generateContent`, {
         method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key }, body: payload,
       })
       if (res.ok) break outer
@@ -110,6 +148,7 @@ Deno.serve(async (req) => {
       await new Promise((r) => setTimeout(r, 1200 * (attempt + 1)))
     }
   }
+  await limpar()
   if (!res || !res.ok) return reply(502, { erro: res?.status === 429 || (res?.status ?? 0) >= 500 ? 'ia_ocupada' : 'falha_ia' })
   const out = await res.json()
   const text = out?.candidates?.[0]?.content?.parts?.map((p: { text?: string }) => p.text ?? '').join('') ?? ''

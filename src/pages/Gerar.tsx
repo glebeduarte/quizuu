@@ -12,16 +12,15 @@ const ERROS: Record<string, string> = {
   limite_diario: 'Você chegou ao limite de 20 gerações nas últimas 24 horas. Tente de novo amanhã.',
   sem_conteudo: 'Escreva um tema ou envie um material.',
   tipo_de_arquivo: 'Envie PDF, TXT, MD, PNG, JPG ou WEBP.',
-  arquivo_grande: 'O arquivo precisa ter até 8 MB.',
+  arquivo_grande: 'O arquivo precisa ter até 30 MB.',
+  arquivo_nao_encontrado: 'O arquivo não chegou ao servidor. Envie de novo.',
+  envio_falhou: 'Não foi possível enviar o arquivo. Verifique a conexão e tente de novo.',
   ia_ocupada: 'O Gemini está com muita demanda agora. Espere um minuto e tente de novo.',
   falha_ia: 'O Gemini não respondeu agora. Tente de novo em instantes.',
   resposta_invalida: 'A IA devolveu perguntas incompletas. Tente de novo ou ajuste o pedido.',
 }
 const ACEITOS = '.pdf,.txt,.md,.png,.jpg,.jpeg,.webp'
 
-const toBase64 = (f: File) => new Promise<string>((res, rej) => {
-  const r = new FileReader(); r.onload = () => res(String(r.result).split(',')[1] ?? ''); r.onerror = rej; r.readAsDataURL(f)
-})
 
 export default function Gerar() {
   const { session } = useAuth()
@@ -36,6 +35,7 @@ export default function Gerar() {
   const [tempo, setTempo] = useState(20)
   const [publico, setPublico] = useState('')
   const [busy, setBusy] = useState(false)
+  const [etapa, setEtapa] = useState('')
   const [erro, setErro] = useState('')
   const [titulo, setTitulo] = useState('')
   const [perguntas, setPerguntas] = useState<Gerada[] | null>(null)
@@ -47,18 +47,27 @@ export default function Gerar() {
     e.preventDefault()
     setErro(''); setBusy(true); setPerguntas(null); setFora(new Set())
     const body: Record<string, unknown> = { quantidade, nivel, tipo, tempo, publico }
+    let uploaded = ''
     if (modo === 'tema') body.tema = tema
     else {
       if (tema) body.tema = tema
       if (material.trim()) body.material = material
       if (arquivo) {
-        if (arquivo.size > 8 * 1024 * 1024) { setErro(ERROS.arquivo_grande); setBusy(false); return }
+        if (arquivo.size > 30 * 1024 * 1024) { setErro(ERROS.arquivo_grande); setBusy(false); return }
         const tipoArq = arquivo.type || (arquivo.name.endsWith('.md') ? 'text/markdown' : 'text/plain')
-        body.arquivo = { nome: arquivo.name, tipo: tipoArq, base64: await toBase64(arquivo) }
+        const ext = (arquivo.name.split('.').pop() || 'bin').toLowerCase().replace(/[^a-z0-9]/g, '')
+        const path = `${session!.user.id}/${crypto.randomUUID()}.${ext}`
+        setEtapa('Enviando o arquivo…')
+        const up = await supabase.storage.from('materiais').upload(path, arquivo, { contentType: tipoArq })
+        if (up.error) { setErro(ERROS.envio_falhou); setBusy(false); setEtapa(''); return }
+        uploaded = path
+        body.arquivo = { nome: arquivo.name, tipo: tipoArq, path }
       }
     }
+    setEtapa(uploaded ? 'Lendo o material e montando as perguntas…' : 'Montando as perguntas…')
     const { data, error } = await supabase.functions.invoke('gerar-quiz', { body })
-    setBusy(false)
+    setBusy(false); setEtapa('')
+    if (error && uploaded) supabase.storage.from('materiais').remove([uploaded])
     if (error) {
       let code = ''
       try { code = (await (error as { context?: Response }).context?.json())?.erro ?? '' } catch { /* sem corpo */ }
@@ -120,7 +129,7 @@ export default function Gerar() {
                 <label>Ou envie um arquivo</label>
                 <label className="dropzone">
                   <input type="file" accept={ACEITOS} hidden onChange={(e) => { setArquivo(e.target.files?.[0] ?? null); e.target.value = '' }} />
-                  {arquivo ? <span><strong>{arquivo.name}</strong> · {(arquivo.size / 1024 / 1024).toLocaleString('pt-BR', { maximumFractionDigits: 1 })} MB</span> : 'PDF, texto ou imagem, até 8 MB'}
+                  {arquivo ? <span><strong>{arquivo.name}</strong> · {(arquivo.size / 1024 / 1024).toLocaleString('pt-BR', { maximumFractionDigits: 1 })} MB</span> : 'PDF, texto ou imagem, até 30 MB'}
                 </label>
                 {arquivo && <button type="button" className="qz-btn qz-btn--ghost" style={{ justifySelf: 'start', minHeight: 0, padding: 0 }} onClick={() => setArquivo(null)}>Remover arquivo</button>}
               </div>
@@ -167,7 +176,7 @@ export default function Gerar() {
         {busy && (
           <div className="gen-loading" aria-live="polite">
             <div className="gen-shapes">{ANSWER.map((a, k) => <span key={a.key} className={`qz-answer--${a.key}`} style={{ animationDelay: `${k * 120}ms` }}><Shape index={k} /></span>)}</div>
-            <p>Montando as perguntas. Isso leva alguns segundos.</p>
+            <p>{etapa || 'Montando as perguntas…'} Arquivos grandes podem levar até um minuto.</p>
           </div>
         )}
 
