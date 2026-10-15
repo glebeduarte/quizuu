@@ -338,7 +338,7 @@ export default function Home() {
           <Reveal className="pf-copy" from="left">
             <span className="kicker">Novo · Votações ao vivo</span>
             <Words text="Sua plateia vota, e o resultado aparece no seu slide." />
-            <p className="lead2" style={{ color: 'var(--ink-muted)' }}>Monte uma sequência de perguntas de múltipla escolha ou nuvem de palavras. A plateia vota pelo QR code e o gráfico cresce ao vivo dentro do PowerPoint, enquanto você fala.</p>
+            <p className="lead2" style={{ color: 'var(--ink-muted)' }}>Monte uma sequência de perguntas de múltipla escolha ou nuvem de palavras. A plateia vota pelo QR code e o gráfico cresce ao vivo no seu PowerPoint ou Canva, enquanto você fala. No Keynote, você baixa os slides com QR code e alterna para o resultado.</p>
             <ul className="ticks">
               <li>Múltipla escolha e nuvem de palavras</li>
               <li>Resultado no telão e no celular de quem votou</li>
