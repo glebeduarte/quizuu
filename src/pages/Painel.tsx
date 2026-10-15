@@ -55,7 +55,10 @@ export default function Painel() {
       <main className="content" style={{ display: 'grid', gap: 'var(--space-6)', alignContent: 'start' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
           <h1 style={{ fontSize: 32 }}>Meus quizzes</h1>
-          <button className="qz-btn qz-btn--primary" onClick={novo} disabled={creating}>{creating ? 'Criando…' : 'Novo quiz'}</button>
+          <div className="btn-row">
+            <Link to="/gerar" className="qz-btn qz-btn--secondary" style={{ textDecoration: 'none' }}>✨ Gerar com IA</Link>
+            <button className="qz-btn qz-btn--primary" onClick={novo} disabled={creating}>{creating ? 'Criando…' : 'Novo quiz'}</button>
+          </div>
         </div>
         {error && <p className="notice notice--err">{error}</p>}
         {quizzes === null ? (
