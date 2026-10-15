@@ -287,11 +287,38 @@ export default function Home() {
         </Reveal>
       </section>
 
-      <footer className="footer2">
-        <div className="section-in footer2-in">
-          <div className="f-brand"><img src="/logo-mark.png" alt="" width="32" height="32" /><span>Quizuu</span></div>
-          <span className="muted">Quiz ao vivo para escolas e eventos</span>
-          <nav className="f-links"><Link to="/jogar">Entrar com PIN</Link><Link to="/entrar">Entrar</Link><Link to="/criar-conta">Criar conta</Link></nav>
+      <footer className="footer3">
+        <div className="section-in">
+          <div className="f3-grid">
+            <div className="f3-brand">
+              <img src="/logo-wordmark.png" alt="Quizuu" className="f3-logo" />
+              <p>Quiz ao vivo para escolas e eventos. Projete as perguntas no telão e coloque a sala inteira para jogar pelo celular.</p>
+              <div className="f3-shapes" aria-hidden="true">{ANSWER.map((a, k) => <span key={a.key} className={`qz-answer--${a.key}`}><Shape index={k} /></span>)}</div>
+            </div>
+            <nav className="f3-col" aria-label="Produto">
+              <h4>Produto</h4>
+              <a href="#como-funciona">Como funciona</a>
+              <Link to="/criar-conta">Criar conta grátis</Link>
+              <Link to="/entrar">Entrar</Link>
+            </nav>
+            <nav className="f3-col" aria-label="Para jogar">
+              <h4>Para jogar</h4>
+              <Link to="/jogar">Entrar com PIN</Link>
+              <span>Sem app para instalar</span>
+              <span>Funciona em qualquer celular</span>
+            </nav>
+            <div className="f3-col">
+              <h4>Criado por</h4>
+              <a href="https://glebeduarte.com.br" target="_blank" rel="noopener" className="f3-author">
+                <strong>Glebe Duarte</strong>
+                <span>glebeduarte.com.br ↗</span>
+              </a>
+            </div>
+          </div>
+          <div className="f3-bottom">
+            <span>© {new Date().getFullYear()} Quizuu. Gratuito para escolas e eventos.</span>
+            <span>Feito em Natal, RN, por <a href="https://glebeduarte.com.br" target="_blank" rel="noopener">Glebe Duarte</a></span>
+          </div>
         </div>
       </footer>
     </div>

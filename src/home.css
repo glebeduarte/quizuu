@@ -290,3 +290,29 @@
 
 /* Rodapé */
 .footer2 { background: #ffffff; }
+
+/* Rodapé completo */
+.footer3 { background: #ffffff; border-top: 1px solid var(--line); padding-block: 64px calc(28px + env(safe-area-inset-bottom, 0px)); }
+.f3-grid { display: grid; grid-template-columns: minmax(0, 1.6fr) repeat(3, minmax(0, 1fr)); gap: 40px; }
+@media (max-width: 860px) { .f3-grid { grid-template-columns: 1fr 1fr; } .f3-brand { grid-column: 1 / -1; } }
+@media (max-width: 480px) { .f3-grid { grid-template-columns: 1fr; } }
+.f3-brand { display: grid; gap: 16px; align-content: start; }
+.f3-logo { height: 34px; width: auto; }
+.f3-brand p { margin: 0; color: var(--ink-muted); line-height: 1.6; max-width: 38ch; }
+.f3-shapes { display: flex; gap: 8px; }
+.f3-shapes span { width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; color: #fff; }
+.f3-shapes .qz-shape { width: 14px; height: 14px; }
+.f3-shapes .qz-answer--red { background: var(--answer-red); } .f3-shapes .qz-answer--orange { background: var(--answer-orange); }
+.f3-shapes .qz-answer--yellow { background: var(--answer-yellow); color: #22103a; } .f3-shapes .qz-answer--purple { background: var(--answer-purple); }
+.f3-col { display: grid; gap: 12px; align-content: start; font-size: 15px; }
+.f3-col h4 { margin: 0 0 4px; font: 800 13px/1 var(--font-body); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-strong); }
+.f3-col a { color: var(--ink-muted); text-decoration: none; font-weight: 700; justify-self: start; }
+.f3-col a:hover { color: var(--brand); }
+.f3-col > span { color: var(--ink-muted); }
+.f3-author { display: grid; gap: 4px; padding: 14px 16px; border-radius: 14px; background: var(--tint-orange); border: 1px solid #f6dcc6; transition: transform .2s, box-shadow .2s; }
+.f3-author strong { font: 800 18px/1.1 var(--font-display); color: var(--ink-strong); }
+.f3-author span { color: var(--brand); font-weight: 800; font-size: 14px; }
+.f3-author:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(232, 98, 12, .15); }
+.f3-bottom { margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-size: 14px; color: var(--ink-muted); }
+.f3-bottom a { color: var(--ink-strong); font-weight: 800; text-decoration: none; }
+.f3-bottom a:hover { color: var(--brand); }
