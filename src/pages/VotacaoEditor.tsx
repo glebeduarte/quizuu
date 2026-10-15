@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { QRCodeCanvas } from 'qrcode.react'
 import { supabase } from '../lib/supabase'
 import { ANSWER, Shape } from '../lib/shapes'
-import { embedUrl, pollChannel, screenUrl, voteUrl } from '../lib/poll'
+import { pollChannel, screenUrl, voteUrl } from '../lib/poll'
 
 type Q = { id: string; kind: 'choice' | 'words'; prompt: string; options: string[] }
 type Poll = { id: string; title: string; code: string; host_key: string; current_position: number; is_open: boolean }
