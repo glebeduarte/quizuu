@@ -91,7 +91,7 @@ create index on public.answers(session_id, question_id);
 
 -- Pontuação (fonte única da fórmula)
 create or replace function public.calc_points(elapsed_ms int, limit_s int, multiplier numeric, correct boolean)
-returns int language sql immutable as $$
+returns int language sql immutable set search_path = '' as $$
   select case when not correct or multiplier = 0 then 0
     else round(1000 * multiplier * (1 - least(greatest(elapsed_ms,0)::numeric / (limit_s*1000), 1) / 2))::int end
 $$;
@@ -138,5 +138,6 @@ begin
   values (new.id, coalesce(new.raw_user_meta_data->>'name', split_part(new.email,'@',1)));
   return new;
 end $$;
+revoke execute on function public.handle_new_user() from public, anon, authenticated;
 create trigger on_auth_user_created after insert on auth.users
   for each row execute function public.handle_new_user();
