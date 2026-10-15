@@ -6,7 +6,7 @@ import { formatPoints } from '../lib/game'
 
 type Option = { id: string; label: string; is_correct: boolean; position: number }
 type Question = { id: string; prompt: string; position: number; options: Option[] }
-type Player = { id: string; nickname: string; score: number; correct_time_ms: number; kicked: boolean }
+type Player = { id: string; nickname: string; score: number; correct_time_ms: number; kicked: boolean; joined_at: string }
 type Answer = { player_id: string; question_id: string; option_id: string | null; elapsed_ms: number; is_correct: boolean; points: number }
 
 const sec = (ms: number) => `${(ms / 1000).toLocaleString('pt-BR', { maximumFractionDigits: 1 })} s`
@@ -33,7 +33,7 @@ export default function Relatorio() {
     (async () => {
       const [s, p, a] = await Promise.all([
         supabase.from('sessions').select('created_at, quizzes(title, questions(id,prompt,position, options(id,label,is_correct,position)))').eq('id', sessionId!).single(),
-        supabase.from('players').select('id,nickname,score,correct_time_ms,kicked').eq('session_id', sessionId!),
+        supabase.from('players').select('id,nickname,score,correct_time_ms,kicked,joined_at').eq('session_id', sessionId!),
         supabase.from('answers').select('player_id,question_id,option_id,elapsed_ms,is_correct,points').eq('session_id', sessionId!),
       ])
       if (s.error || !s.data) { setError('Relatório não encontrado.'); return }
@@ -43,7 +43,7 @@ export default function Relatorio() {
       const answered = new Set((a.data ?? []).map((x) => x.question_id))
       setQuestions(quiz.questions.filter((q) => answered.has(q.id)).sort((x, y) => x.position - y.position)
         .map((q) => ({ ...q, options: [...q.options].sort((x, y) => x.position - y.position) })))
-      setPlayers(((p.data ?? []) as Player[]).filter((x) => !x.kicked).sort((x, y) => y.score - x.score || x.correct_time_ms - y.correct_time_ms))
+      setPlayers(((p.data ?? []) as Player[]).filter((x) => !x.kicked).sort((x, y) => y.score - x.score || x.correct_time_ms - y.correct_time_ms || x.joined_at.localeCompare(y.joined_at)))
       setAnswers((a.data ?? []) as Answer[])
     })()
   }, [sessionId])

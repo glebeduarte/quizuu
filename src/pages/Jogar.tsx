@@ -43,11 +43,15 @@ export default function Jogar() {
   }, [])
 
   const fetchResult = useCallback(async (p: PlayerSave, withSound = false) => {
-    const { data } = await supabase.rpc('my_result', { p_player_id: p.playerId, p_token: p.token })
-    if (data?.[0]) {
-      const r = data[0] as Result
-      if (withSound) (r.is_correct ? sfx.correct : sfx.wrong)()
-      setResult(r)
+    // tenta algumas vezes: o celular pode chegar antes do banco terminar de atualizar
+    for (let i = 0; i < 4; i++) {
+      const { data } = await supabase.rpc('my_result', { p_player_id: p.playerId, p_token: p.token })
+      if (data?.[0]) {
+        const r = data[0] as Result
+        if (withSound) (r.is_correct ? sfx.correct : sfx.wrong)()
+        setResult(r); return
+      }
+      await new Promise((res) => setTimeout(res, 700 * (i + 1)))
     }
   }, [])
 
@@ -58,7 +62,7 @@ export default function Jogar() {
       const s = payload as GameState
       setState(s)
       if (s.phase === 'question') { setPicked(null); setResult(null); setRemaining(s.timeLimit) }
-      if (s.phase === 'reveal' || s.phase === 'podium') fetchResult(me, s.phase === 'reveal')
+      if (s.phase === 'reveal' || s.phase === 'leaderboard' || s.phase === 'podium') fetchResult(me, s.phase === 'reveal')
     }).on('broadcast', { event: 'kicked' }, ({ payload }) => {
       if ((payload as { playerId: string }).playerId === me.playerId) { savePlayer(null); setMe(null); setMsg('Você foi removido da sala pelo organizador.') }
     }).subscribe((status) => {
@@ -161,7 +165,7 @@ export default function Jogar() {
         </main>
       ))}
 
-      {(state.phase === 'reveal' || state.phase === 'leaderboard') && (
+      {state.phase === 'reveal' && (
         <main className={`center player-msg ${result?.is_correct ? 'is-right' : 'is-wrong'}`}>
           {!result ? <p className="muted">Calculando…</p> : (
             <>
@@ -170,6 +174,19 @@ export default function Jogar() {
               {result.points > 0 && <p className="gain">+{formatPoints(result.points)}</p>}
               {result.streak >= 2 && <p>{result.streak} acertos seguidos</p>}
               <p className="muted">{result.rank}º lugar de {result.total}</p>
+            </>
+          )}
+        </main>
+      )}
+
+      {state.phase === 'leaderboard' && (
+        <main className="center player-msg">
+          {!result ? <p className="muted">Calculando sua posição…</p> : (
+            <>
+              <span className="muted">Sua posição</span>
+              <div className="rank-big">{result.rank}º</div>
+              <p className="muted" style={{ margin: 0 }}>de {result.total} {result.total === 1 ? "jogador" : "jogadores"} · {formatPoints(result.score)} pontos</p>
+              <p style={{ margin: 0 }}>{result.rank === 1 ? 'Você está na liderança!' : result.rank <= 3 ? 'Você está no pódio. Segure!' : 'Ainda dá para subir. Atenção na próxima!'}</p>
             </>
           )}
         </main>

@@ -56,7 +56,7 @@ export default function Host() {
 
   const loadPlayers = useCallback(async () => {
     const { data } = await supabase.from('players').select('id,nickname,score,streak,correct_time_ms')
-      .eq('session_id', sessionId!).eq('kicked', false).order('score', { ascending: false }).order('correct_time_ms')
+      .eq('session_id', sessionId!).eq('kicked', false).order('score', { ascending: false }).order('correct_time_ms').order('joined_at')
     setPlayers(data ?? [])
   }, [sessionId])
 
