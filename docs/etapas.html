@@ -80,7 +80,7 @@ h1{font:800 clamp(30px,6vw,44px)/1.05 var(--display);margin:8px 0 10px;text-wrap
 
 <script type="application/json" id="state">
 {"updated":"14/10/2026, 23:40",
-"next":{"you":"Fazer uma partida de teste com 2 ou 3 celulares e me contar o que sentiu.","me":"Geração de quiz por IA (Fase 8)."},
+"next":{"you":"Fazer uma partida de teste com 2 ou 3 celulares e me contar o que sentiu.","me":"Teste de carga com 200 jogadores (Fase 9)."},
 "phases":[
 {"title":"Decisões e fundação","desc":"Fechar os pontos abertos e preparar o ambiente onde tudo vai rodar.","note":"Repositório criado e organizado com especificação e esquema do banco. Projeto Supabase Quizuu conectado (São Paulo).","ready":"ambiente pronto e decisões de produto tomadas.","tasks":[
  {"t":"Criar repositório no GitHub (glebeduarte/quizuu)","s":"done"},
@@ -88,7 +88,7 @@ h1{font:800 clamp(30px,6vw,44px)/1.05 var(--display);margin:8px 0 10px;text-wrap
  {"t":"Conectar o projeto Supabase do Quizuu","s":"done"},
  {"t":"Definir público principal: eventos e escolas","s":"done"},
  {"t":"Definir identidade visual (design system criado; logo tipográfica por enquanto)","s":"done"},
- {"t":"Decidir se é produto pago ou ferramenta interna","s":"todo"}]},
+ {"t":"Modelo: ferramenta gratuita","s":"done"}]},
 {"title":"Banco de dados e segurança","desc":"Tabelas de quiz, sala, jogadores e respostas, com as regras de acesso.","note":"Esquema aplicado no Supabase: 7 tabelas, fórmula de pontuação e regras de acesso. Alertas de segurança zerados.","ready":"banco no ar, sem alertas de segurança.","tasks":[
  {"t":"Escrever o esquema (quizzes, perguntas, opções, salas, jogadores, respostas)","s":"done"},
  {"t":"Aplicar o esquema no Supabase","s":"done"},
@@ -120,7 +120,7 @@ h1{font:800 clamp(30px,6vw,44px)/1.05 var(--display);margin:8px 0 10px;text-wrap
  {"t":"Pódio final com top 3","s":"done"},
  {"t":"Relatório da partida (acertos por pergunta, tempo médio)","s":"done"},
  {"t":"Exportar resultados em planilha","s":"done"}]},
-{"title":"Perguntas geradas por IA","desc":"Criar um quiz inteiro a partir de um tema ou de um texto colado.","ready":"quiz de 10 perguntas gerado e editável em segundos.","tasks":[
+{"title":"Perguntas geradas por IA","desc":"Criar um quiz inteiro a partir de um tema ou de um texto colado.","note":"Em espera: a API do Claude tem custo por uso e precisa de uma chave da Anthropic. Fica para quando você decidir.","ready":"quiz de 10 perguntas gerado e editável em segundos.","tasks":[
  {"t":"Função que chama o Claude com tema, nível e quantidade","s":"todo"},
  {"t":"Gerar a partir de texto ou PDF colado","s":"todo"},
  {"t":"Revisão das perguntas antes de salvar","s":"todo"}]},
