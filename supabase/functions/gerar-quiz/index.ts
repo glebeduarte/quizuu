@@ -91,19 +91,26 @@ Deno.serve(async (req) => {
   if (material) parts.push({ text: `MATERIAL:\n${material}` })
   if (arquivo) parts.push({ inline_data: { mime_type: arquivo.tipo, data: arquivo.base64 } })
 
-  const model = Deno.env.get('GEMINI_MODEL') || 'gemini-flash-latest'
-  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
-    body: JSON.stringify({
-      contents: [{ role: 'user', parts }],
-      generationConfig: { responseMimeType: 'application/json', responseSchema: schema, temperature: 0.7 },
-    }),
+  // Tenta o modelo principal e, se estiver sobrecarregado, um reserva mais leve
+  const models = [Deno.env.get('GEMINI_MODEL') || 'gemini-flash-latest', 'gemini-flash-lite-latest']
+  const payload = JSON.stringify({
+    contents: [{ role: 'user', parts }],
+    generationConfig: { responseMimeType: 'application/json', responseSchema: schema, temperature: 0.7 },
   })
-  if (!res.ok) {
-    console.error('gemini', res.status, await res.text())
-    return reply(502, { erro: 'falha_ia' })
+  let res: Response | null = null
+  outer: for (const model of models) {
+    for (let attempt = 0; attempt < 2; attempt++) {
+      res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key }, body: payload,
+      })
+      if (res.ok) break outer
+      const busy = res.status === 429 || res.status >= 500
+      console.error('gemini', model, res.status, (await res.text()).slice(0, 300))
+      if (!busy) break outer
+      await new Promise((r) => setTimeout(r, 1200 * (attempt + 1)))
+    }
   }
+  if (!res || !res.ok) return reply(502, { erro: res?.status === 429 || (res?.status ?? 0) >= 500 ? 'ia_ocupada' : 'falha_ia' })
   const out = await res.json()
   const text = out?.candidates?.[0]?.content?.parts?.map((p: { text?: string }) => p.text ?? '').join('') ?? ''
   let quiz: { titulo: string; perguntas: { enunciado: string; tipo: string; opcoes: string[]; correta: number }[] }

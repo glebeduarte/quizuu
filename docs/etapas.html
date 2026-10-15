@@ -79,8 +79,8 @@ h1{font:800 clamp(30px,6vw,44px)/1.05 var(--display);margin:8px 0 10px;text-wrap
 </div>
 
 <script type="application/json" id="state">
-{"updated":"15/10/2026, 00:30",
-"next":{"you":"Cadastrar a chave do Gemini no Supabase, fazer a partida piloto e escolher o domínio.","me":"Testar a geração com a chave real, apontar o domínio e ajustar o que surgir no piloto."},
+{"updated":"15/10/2026, 01:00",
+"next":{"you":"Fazer a partida piloto com público real e escolher o domínio oficial.","me":"Apontar o domínio quando você escolher e ajustar o que surgir no piloto."},
 "phases":[
 {"title":"Decisões e fundação","desc":"Fechar os pontos abertos e preparar o ambiente onde tudo vai rodar.","note":"Repositório criado e organizado com especificação e esquema do banco. Projeto Supabase Quizuu conectado (São Paulo).","ready":"ambiente pronto e decisões de produto tomadas.","tasks":[
  {"t":"Criar repositório no GitHub (glebeduarte/quizuu)","s":"done"},
@@ -120,7 +120,7 @@ h1{font:800 clamp(30px,6vw,44px)/1.05 var(--display);margin:8px 0 10px;text-wrap
  {"t":"Pódio final com top 3","s":"done"},
  {"t":"Relatório da partida (acertos por pergunta, tempo médio)","s":"done"},
  {"t":"Exportar resultados em planilha","s":"done"}]},
-{"title":"Perguntas geradas por IA","desc":"Criar um quiz inteiro a partir de um tema ou de um texto colado.","note":"Usando o Gemini. Tela e função no servidor prontas, com limite de 20 gerações por dia por organizador. Falta cadastrar a chave GEMINI_API_KEY no Supabase.","ready":"quiz de 10 perguntas gerado e editável em segundos.","tasks":[
+{"title":"Perguntas geradas por IA","desc":"Criar um quiz inteiro a partir de um tema ou de um texto colado.","note":"Funcionando com o Gemini e testado por tema, texto colado e arquivo (10 a 17 s por geração). Se o Gemini estiver sobrecarregado, tenta de novo e usa um modelo reserva. Limite de 20 gerações por dia por organizador.","ready":"quiz de 10 perguntas gerado e editável em segundos.","tasks":[
  {"t":"Função que chama o Gemini com tema, nível, tipo e quantidade","s":"done"},
  {"t":"Gerar a partir de texto colado ou arquivo (PDF, texto, imagem)","s":"done"},
  {"t":"Revisão das perguntas antes de salvar","s":"done"}]},

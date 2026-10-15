@@ -13,6 +13,7 @@ const ERROS: Record<string, string> = {
   sem_conteudo: 'Escreva um tema ou envie um material.',
   tipo_de_arquivo: 'Envie PDF, TXT, MD, PNG, JPG ou WEBP.',
   arquivo_grande: 'O arquivo precisa ter até 8 MB.',
+  ia_ocupada: 'O Gemini está com muita demanda agora. Espere um minuto e tente de novo.',
   falha_ia: 'O Gemini não respondeu agora. Tente de novo em instantes.',
   resposta_invalida: 'A IA devolveu perguntas incompletas. Tente de novo ou ajuste o pedido.',
 }
