@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import { useAuth } from '../lib/auth'
 import { ANSWER, Shape } from '../lib/shapes'
 import { saveQuiz } from '../lib/saveQuiz'
 
@@ -26,7 +25,6 @@ function problems(q: Question): string[] {
 
 export default function Editor() {
   const { id } = useParams()
-  const { session } = useAuth()
   const navigate = useNavigate()
   const [title, setTitle] = useState('')
   const [questions, setQuestions] = useState<Question[]>([])
@@ -90,15 +88,6 @@ export default function Editor() {
     setQuestions((qs) => { const c = [...qs]; [c[current], c[to]] = [c[to], c[current]]; return c }); setCurrent(to); setDirty(true)
   }
 
-  async function upload(file: File) {
-    if (file.size > 5 * 1024 * 1024) { setNotice({ kind: 'err', text: 'A imagem precisa ter até 5 MB.' }); return }
-    const ext = file.name.split('.').pop()?.toLowerCase() || 'png'
-    const path = `${session!.user.id}/${uid()}.${ext}`
-    const { error } = await supabase.storage.from('midia').upload(path, file, { contentType: file.type })
-    if (error) { setNotice({ kind: 'err', text: 'O envio de imagens ainda não está ativo. A pergunta funciona sem imagem.' }); return }
-    update({ media_url: supabase.storage.from('midia').getPublicUrl(path).data.publicUrl })
-  }
-
   async function save() {
     setSaving(true); setNotice(null)
     const payload = questions.map((x) => ({ ...x, options: x.options.filter((o) => o.label.trim()).map((o) => ({ ...o, label: o.label.trim() })) }))
@@ -160,22 +149,6 @@ export default function Editor() {
             <textarea id="prompt" className="input textarea" maxLength={300} rows={2} value={q.prompt}
               placeholder="Ex.: Qual é a capital do Rio Grande do Norte?" onChange={(e) => update({ prompt: e.target.value })} />
             <span className="muted" style={{ fontSize: 13, justifySelf: 'end' }}>{q.prompt.length}/300{q.prompt.length > 120 ? ' · longo para o telão' : ''}</span>
-          </div>
-
-          <div className="field">
-            <label>Imagem (opcional)</label>
-            {q.media_url ? (
-              <div className="media">
-                <img src={q.media_url} alt="" />
-                <button className="qz-btn qz-btn--ghost" onClick={() => update({ media_url: '' })}>Remover imagem</button>
-              </div>
-            ) : (
-              <label className="dropzone">
-                <input type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden
-                  onChange={(e) => { const f = e.target.files?.[0]; if (f) upload(f); e.target.value = '' }} />
-                Escolher imagem (até 5 MB)
-              </label>
-            )}
           </div>
 
           <div className="settings">

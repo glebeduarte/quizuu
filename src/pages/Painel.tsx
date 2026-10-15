@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/auth'
+import { randomPin } from '../lib/game'
 
 type Quiz = { id: string; title: string; updated_at: string; questions: { count: number }[] }
 
@@ -23,6 +24,17 @@ export default function Painel() {
       .insert({ owner_id: session!.user.id, title: 'Quiz sem título' }).select('id').single()
     if (error || !data) { setError('Não foi possível criar o quiz. Tente de novo.'); setCreating(false); return }
     navigate(`/quiz/${data.id}`)
+  }
+
+  async function jogar(quizId: string) {
+    setError('')
+    for (let i = 0; i < 5; i++) {
+      const { data, error } = await supabase.from('sessions')
+        .insert({ quiz_id: quizId, host_id: session!.user.id, pin: randomPin() }).select('id').single()
+      if (data) { navigate(`/host/${data.id}`); return }
+      if (error && error.code !== '23505') break
+    }
+    setError('Não foi possível abrir a sala. Tente de novo.')
   }
 
   const fmt = (d: string) => new Date(d).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })
@@ -52,12 +64,16 @@ export default function Painel() {
         ) : (
           <div className="quiz-grid">
             {quizzes.map((q) => (
-              <Link key={q.id} to={`/quiz/${q.id}`} className="card quiz-card">
-                <h2 style={{ fontSize: 20 }}>{q.title}</h2>
+              <div key={q.id} className="card quiz-card">
+                <Link to={`/quiz/${q.id}`} className="quiz-card__link"><h2 style={{ fontSize: 20 }}>{q.title}</h2></Link>
                 <span className="muted" style={{ fontSize: 14 }}>
                   {q.questions[0]?.count ?? 0} perguntas · editado em {fmt(q.updated_at)}
                 </span>
-              </Link>
+                <div className="btn-row">
+                  <button className="qz-btn qz-btn--primary" disabled={!q.questions[0]?.count} onClick={() => jogar(q.id)}>Jogar</button>
+                  <Link to={`/quiz/${q.id}`} className="qz-btn qz-btn--secondary" style={{ textDecoration: 'none' }}>Editar</Link>
+                </div>
+              </div>
             ))}
           </div>
         )}

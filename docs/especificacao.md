@@ -40,9 +40,10 @@ Tempo medido no servidor (chegada da resposta menos abertura da pergunta).
 
 ## Decisões tomadas
 - Público principal: eventos e escolas.
+- Ferramenta gratuita no primeiro momento.
+- Sem envio de imagem ou vídeo por enquanto.
+- Login do organizador com e-mail e senha, sem verificação.
 - Identidade: design system em docs/design-system (vermelho, laranja, amarelo e roxo, cada cor com sua forma).
 
 ## Decisões em aberto
-- Logo.
-- Produto pago ou ferramenta interna.
 - Domínio.
