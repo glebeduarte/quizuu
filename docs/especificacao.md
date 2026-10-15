@@ -46,4 +46,4 @@ Tempo medido no servidor (chegada da resposta menos abertura da pergunta).
 - Identidade: design system em docs/design-system (vermelho, laranja, amarelo e roxo, cada cor com sua forma).
 
 ## Decisões em aberto
-- Domínio.
+- Domínio: decidido, quizuubr.vercel.app.

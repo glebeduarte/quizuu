@@ -211,7 +211,7 @@ export default function Home() {
             <Reveal as="li" delay={120} className="step2">
               <div className="mock mock-pin">
                 <div className="mp-card"><small>PIN do jogo</small><strong>482 913</strong></div>
-                <div className="mp-qr"><QRCodeSVG value="https://quizuu-beryl.vercel.app/jogar?pin=482913" size={84} marginSize={1} /></div>
+                <div className="mp-qr"><QRCodeSVG value="https://quizuubr.vercel.app/jogar?pin=482913" size={84} marginSize={1} /></div>
                 <div className="mp-chips">{['Lara', 'Rafa', 'Prof. Ana', 'Turma 8B', 'Duda'].map((n, k) => <span key={n} style={{ animationDelay: `${k * 260}ms` }}>{n}</span>)}</div>
               </div>
               <span className="step2-n">2</span><h3>Projete o PIN</h3>
@@ -280,7 +280,7 @@ export default function Home() {
                     </div>
                   ))}
                 </div>
-                <div className="pf-qr"><QRCodeSVG value="https://quizuu-beryl.vercel.app/v/PALCO1" size={72} marginSize={1} /><span>PALCO1</span></div>
+                <div className="pf-qr"><QRCodeSVG value="https://quizuubr.vercel.app/v/PALCO1" size={72} marginSize={1} /><span>PALCO1</span></div>
               </div>
             </div>
             <div className="pf-cloud-card">
