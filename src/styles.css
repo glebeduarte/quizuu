@@ -264,3 +264,48 @@ select.input { font-size: 16px; }
 .is-right .verdict { background: var(--correct); } .is-wrong .verdict { background: var(--wrong); }
 .gain { font: 800 40px/1 var(--font-display); margin: 0; color: var(--answer-yellow); }
 @media (prefers-reduced-motion: reduce) { .chip, .podium-col { animation: none; } }
+
+/* Login */
+.switch-account { display: grid; gap: var(--space-2); justify-items: center; padding-top: var(--space-4); border-top: 1px solid var(--line); }
+
+/* Home */
+.home-hero-wrap { min-height: auto; }
+.home-nav .qz-btn { min-height: 40px; padding: 0 var(--space-4); text-decoration: none; }
+@media (max-width: 520px) { .home-nav .qz-btn--ghost:first-child { display: none; } }
+.qz-btn--lg { min-height: 56px; padding: 0 var(--space-8); font-size: 19px; text-decoration: none; }
+.hero { padding-block: var(--space-6) var(--space-12); }
+.hero-copy { display: grid; gap: var(--space-6); align-content: center; }
+.eyebrow { font: 800 13px/1 var(--font-body); letter-spacing: .08em; text-transform: uppercase; color: var(--brand); }
+.lead { font-size: 19px; line-height: 1.55; color: var(--ink-muted); margin: 0; max-width: 46ch; }
+.demo { display: grid; gap: var(--space-4); }
+.demo-top { display: flex; justify-content: space-between; font: 800 14px/1 var(--font-body); opacity: .85; }
+.demo-pin { background: var(--stage-deep); padding: 6px 10px; border-radius: var(--radius-pill); letter-spacing: .04em; }
+.demo-prompt { margin: 0; font: 800 24px/30px var(--font-display); min-height: 60px; }
+.demo .qz-answer { cursor: default; font-size: 19px; }
+.band { background: var(--stage); color: var(--on-color); padding-block: var(--space-12); padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right)); }
+.section-title { font: 800 36px/1.1 var(--font-display); margin-bottom: var(--space-8); }
+.steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: var(--space-6); }
+@media (max-width: 760px) { .steps { grid-template-columns: 1fr; } }
+.steps li { display: grid; gap: var(--space-2); align-content: start; }
+.steps h3 { font-size: 24px; }
+.steps p { margin: 0; opacity: .85; line-height: 1.55; }
+.step-n { width: 48px; height: 48px; border-radius: var(--radius-md); display: grid; place-items: center; font: 800 24px/1 var(--font-display); color: var(--on-color); box-shadow: var(--shadow-press); }
+.steps li:nth-child(1) .step-n { background: var(--answer-red); }
+.steps li:nth-child(2) .step-n { background: var(--answer-orange); }
+.steps li:nth-child(3) .step-n { background: var(--answer-yellow); color: #22103a; }
+.audiences, .features { padding-inline: max(16px, env(safe-area-inset-left)); }
+.audiences { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: var(--space-6); padding-block: var(--space-12) var(--space-6); }
+@media (max-width: 760px) { .audiences { grid-template-columns: 1fr; } }
+.audience { background: var(--surface-raised); border-radius: var(--radius-lg); padding: var(--space-8); box-shadow: var(--shadow-card); display: grid; gap: var(--space-3); }
+.audience h3 { font-size: 26px; }
+.audience p, .feature p { margin: 0; color: var(--ink-muted); line-height: 1.55; }
+.features { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: var(--space-6); padding-block: var(--space-6) var(--space-12); }
+@media (max-width: 900px) { .features { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+@media (max-width: 480px) { .features { grid-template-columns: 1fr; } }
+.feature { display: grid; gap: var(--space-2); align-content: start; border-top: 4px solid var(--answer-purple); padding-top: var(--space-4); }
+.feature:nth-child(2) { border-color: var(--answer-orange); } .feature:nth-child(3) { border-color: var(--answer-red); } .feature:nth-child(4) { border-color: var(--answer-yellow); }
+.feature h3 { font-size: 20px; }
+.cta-final { display: grid; justify-items: center; gap: var(--space-6); text-align: center; padding-block: var(--space-12); padding-inline: 16px; }
+.cta-final h2 { font: 800 clamp(28px, 5vw, 40px)/1.1 var(--font-display); }
+.footer { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-6) 16px var(--space-8); border-top: 1px solid var(--line); font-size: 14px; }
+.hero > * { min-width: 0; }

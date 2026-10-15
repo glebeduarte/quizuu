@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { Link, Navigate } from 'react-router-dom'
+import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/auth'
 
@@ -10,9 +10,10 @@ const ERRORS: Record<string, string> = {
   over_email_send_rate_limit: 'Muitas tentativas seguidas. Espere um minuto e tente de novo.',
 }
 
-export default function Login() {
+export default function Login({ initial = 'entrar' }: { initial?: 'entrar' | 'criar' }) {
   const { session } = useAuth()
-  const [mode, setMode] = useState<'entrar' | 'criar'>('entrar')
+  const navigate = useNavigate()
+  const [mode, setMode] = useState<'entrar' | 'criar'>(initial)
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -41,7 +42,7 @@ export default function Login() {
     <div className="page">
       <header className="topbar"><Link to="/" className="wordmark"><picture><source srcSet="/logo-wordmark-light.png" media="(prefers-color-scheme: dark)" /><img src="/logo-wordmark.png" alt="Quizuu" /></picture></Link></header>
       <main className="narrow card">
-        <h1 style={{ fontSize: 32, lineHeight: '38px' }}>{mode === 'entrar' ? 'Entrar como organizador' : 'Criar conta de organizador'}</h1>
+        <h1 style={{ fontSize: 32, lineHeight: '38px' }}>{mode === 'entrar' ? 'Entrar' : 'Criar sua conta'}</h1>
         <form onSubmit={submit} style={{ display: 'grid', gap: 'var(--space-4)' }}>
           {mode === 'criar' && (
             <div className="field">
@@ -65,13 +66,12 @@ export default function Login() {
             {busy ? 'Aguarde…' : mode === 'entrar' ? 'Entrar' : 'Criar conta e entrar'}
           </button>
         </form>
-        <p className="muted" style={{ margin: 0, textAlign: 'center' }}>
-          {mode === 'entrar' ? 'Primeira vez aqui? ' : 'Já tem conta? '}
-          <button className="qz-btn qz-btn--ghost" style={{ minHeight: 0, padding: 0, display: 'inline' }}
-            onClick={() => { setMode(mode === 'entrar' ? 'criar' : 'entrar'); setError('') }}>
-            {mode === 'entrar' ? 'Criar conta' : 'Entrar'}
+        <div className="switch-account">
+          <span className="muted">{mode === 'entrar' ? 'Ainda não tem conta?' : 'Já tem conta?'}</span>
+          <button className="qz-btn qz-btn--secondary" onClick={() => { const m = mode === 'entrar' ? 'criar' : 'entrar'; setMode(m); setError(''); navigate(m === 'criar' ? '/criar-conta' : '/entrar', { replace: true }) }}>
+            {mode === 'entrar' ? 'Criar conta grátis' : 'Entrar'}
           </button>
-        </p>
+        </div>
       </main>
     </div>
   )
