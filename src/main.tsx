@@ -11,6 +11,10 @@ import Host from './pages/Host'
 import Editor from './pages/Editor'
 import Relatorio from './pages/Relatorio'
 import Gerar from './pages/Gerar'
+import Votacoes from './pages/Votacoes'
+import VotacaoEditor from './pages/VotacaoEditor'
+import Votar from './pages/Votar'
+import Tela from './pages/Tela'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -26,6 +30,10 @@ createRoot(document.getElementById('root')!).render(
           <Route path="/gerar" element={<RequireAuth><Gerar /></RequireAuth>} />
           <Route path="/relatorio/:sessionId" element={<RequireAuth><Relatorio /></RequireAuth>} />
           <Route path="/host/:sessionId" element={<RequireAuth><Host /></RequireAuth>} />
+          <Route path="/votacoes" element={<RequireAuth><Votacoes /></RequireAuth>} />
+          <Route path="/votacao/:id" element={<RequireAuth><VotacaoEditor /></RequireAuth>} />
+          <Route path="/v/:code" element={<Votar />} />
+          <Route path="/v/:code/tela" element={<Tela />} />
           <Route path="*" element={<Home />} />
         </Routes>
       </BrowserRouter>

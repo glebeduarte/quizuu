@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/auth'
 import { randomPin } from '../lib/game'
+import { PanelTabs } from './Votacoes'
 
 type Partida = { id: string; created_at: string; status: string; quizzes: { title: string } | null; players: { count: number }[] }
 type Quiz = { id: string; title: string; updated_at: string; questions: { count: number }[] }
@@ -64,6 +65,7 @@ export default function Painel() {
         </div>
       </header>
       <main className="content" style={{ display: 'grid', gap: 'var(--space-6)', alignContent: 'start' }}>
+        <PanelTabs active="quizzes" />
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
           <h1 style={{ fontSize: 32 }}>Meus quizzes</h1>
           <div className="btn-row">

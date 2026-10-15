@@ -152,6 +152,7 @@ export default function Home() {
           <Link to="/" className="wordmark"><img src="/logo-wordmark.png" alt="Quizuu" /></Link>
           <nav className="home-nav">
             <a href="#como-funciona" className="nav-link">Como funciona</a>
+            <a href="#votacoes" className="nav-link">Votações</a>
             <Link to="/jogar" className="nav-link">Tenho um PIN</Link>
             {session
               ? <Link to="/painel" className="qz-btn qz-btn--primary">Meus quizzes</Link>
@@ -249,6 +250,51 @@ export default function Home() {
         </div>
       </section>
 
+      <section className="section" id="votacoes">
+        <div className="section-in poll-feature">
+          <Reveal className="pf-copy">
+            <span className="kicker">Novo · Votações ao vivo</span>
+            <h2 className="h2x">Sua plateia vota, e o resultado aparece no seu slide.</h2>
+            <p className="lead2" style={{ color: 'var(--ink-muted)' }}>Monte uma sequência de perguntas de múltipla escolha ou nuvem de palavras. A plateia vota pelo QR code e o gráfico cresce ao vivo dentro do PowerPoint, enquanto você fala.</p>
+            <ul className="ticks">
+              <li>Múltipla escolha e nuvem de palavras</li>
+              <li>Resultado no telão e no celular de quem votou</li>
+              <li>Um slide por pergunta: o slide aparece, a votação muda sozinha</li>
+              <li>Palavrões são barrados antes de chegar à tela</li>
+            </ul>
+            <div className="btn-row" style={{ marginTop: 8 }}>
+              <Link to={session ? '/votacoes' : '/criar-conta'} className="qz-btn qz-btn--primary qz-btn--lg">{session ? 'Criar uma votação' : 'Criar conta grátis'}</Link>
+            </div>
+          </Reveal>
+          <Reveal className="pf-visual" delay={150}>
+            <div className="pf-slide">
+              <div className="pf-bar-top"><span /><span /><span /></div>
+              <div className="pf-slide-in">
+                <div className="pf-left">
+                  <strong className="pf-q">Qual tema você quer aprofundar?</strong>
+                  {[['Vendas', 62, 'red', 0], ['Conteúdo', 24, 'orange', 1], ['Gestão', 14, 'yellow', 2]].map(([l, v, c, k]) => (
+                    <div key={l as string} className="pf-row">
+                      <span className={`pf-shape qz-answer--${c}`}><Shape index={k as number} /></span>
+                      <div className="pf-track"><i className={`qz-answer--${c}`} style={{ ['--w' as string]: `${v}%` }} /></div>
+                      <b>{v}%</b>
+                    </div>
+                  ))}
+                </div>
+                <div className="pf-qr"><QRCodeSVG value="https://quizuu-beryl.vercel.app/v/PALCO1" size={72} marginSize={1} /><span>PALCO1</span></div>
+              </div>
+            </div>
+            <div className="pf-cloud-card">
+              <span className="pf-cloud-title">Em uma palavra?</span>
+              <div className="pf-cloud">
+                {[['curioso', 15, 'purple'], ['animado', 30, 'red'], ['pronto', 18, 'orange'], ['focado', 22, 'yellow'], ['feliz', 14, 'purple'], ['inspirado', 17, 'orange']].map(([w, f, c], i) => (
+                  <span key={w as string} className={`pr-word c-${c}`} style={{ fontSize: f as number, animationDelay: `${i * 120}ms` }}>{w}</span>
+                ))}
+              </div>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
       <section className="section">
         <div className="section-in">
           <div className="stats">
@@ -292,12 +338,13 @@ export default function Home() {
           <div className="f3-grid">
             <div className="f3-brand">
               <img src="/logo-wordmark.png" alt="Quizuu" className="f3-logo" />
-              <p>Quiz ao vivo para escolas e eventos. Projete as perguntas no telão e coloque a sala inteira para jogar pelo celular.</p>
+              <p>Quiz e votações ao vivo para escolas e eventos. Projete no telão ou no seu slide e coloque a sala inteira para participar pelo celular.</p>
               <div className="f3-shapes" aria-hidden="true">{ANSWER.map((a, k) => <span key={a.key} className={`qz-answer--${a.key}`}><Shape index={k} /></span>)}</div>
             </div>
             <nav className="f3-col" aria-label="Produto">
               <h4>Produto</h4>
               <a href="#como-funciona">Como funciona</a>
+              <a href="#votacoes">Votações ao vivo</a>
               <Link to="/criar-conta">Criar conta grátis</Link>
               <Link to="/entrar">Entrar</Link>
             </nav>
