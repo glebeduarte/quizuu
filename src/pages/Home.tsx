@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { MotionConfig, motion, useMotionValue, useReducedMotion, useScroll, useSpring, useTransform } from 'motion/react'
 import { Link } from 'react-router-dom'
 import { QRCodeSVG } from 'qrcode.react'
 import { ANSWER, Shape } from '../lib/shapes'
@@ -100,18 +101,98 @@ function Scene() {
   )
 }
 
-/* Revela elementos ao rolar a página */
-function Reveal({ children, className = '', delay = 0, as: Tag = 'div' }: { children: ReactNode; className?: string; delay?: number; as?: 'div' | 'li' | 'section' }) {
-  const ref = useRef<HTMLElement | null>(null)
-  const [on, setOn] = useState(false)
-  useEffect(() => {
-    const el = ref.current
-    if (!el || reduced() || !('IntersectionObserver' in window)) { setOn(true); return }
-    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setOn(true); io.disconnect() } }, { threshold: 0.15, rootMargin: '0px 0px -8% 0px' })
-    io.observe(el)
-    return () => io.disconnect()
-  }, [])
-  return <Tag ref={ref as never} className={`reveal${on ? ' in' : ''} ${className}`} style={{ transitionDelay: `${delay}ms` }}>{children}</Tag>
+/* Movimento: valores compartilhados */
+const SPRING = { type: 'spring', stiffness: 90, damping: 18, mass: 0.9 } as const
+const EASE_OUT = [0.22, 1, 0.36, 1] as const
+
+/* Revela elementos ao rolar a página (mola + desfoque). Mantém a classe "in" para as animações CSS internas. */
+function Reveal({ children, className = '', delay = 0, as = 'div' }: { children: ReactNode; className?: string; delay?: number; as?: 'div' | 'li' | 'section' }) {
+  const reduce = useReducedMotion()
+  const [on, setOn] = useState(!!reduce)
+  const Tag = as === 'li' ? motion.li : as === 'section' ? motion.section : motion.div
+  return (
+    <Tag
+      className={`reveal${on ? ' in' : ''} ${className}`}
+      initial={reduce ? false : { opacity: 0, y: 44, scale: 0.97, filter: 'blur(8px)' }}
+      whileInView={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
+      viewport={{ once: true, amount: 0.2, margin: '0px 0px -8% 0px' }}
+      transition={{ ...SPRING, delay: delay / 1000, filter: { duration: 0.6, ease: EASE_OUT, delay: delay / 1000 } }}
+      onViewportEnter={() => setOn(true)}
+    >{children}</Tag>
+  )
+}
+
+/* Título de seção que entra palavra por palavra */
+function Words({ text, className = 'h2x' }: { text: string; className?: string }) {
+  const reduce = useReducedMotion()
+  if (reduce) return <h2 className={className}>{text}</h2>
+  return (
+    <motion.h2 className={className} initial="hide" whileInView="show" viewport={{ once: true, amount: 0.6 }}
+      transition={{ staggerChildren: 0.055, delayChildren: 0.08 }}>
+      {text.split(' ').map((w, i) => (
+        <motion.span key={i} style={{ display: 'inline-block', whiteSpace: 'pre' }}
+          variants={{ hide: { opacity: 0, y: '0.6em', rotate: 3 }, show: { opacity: 1, y: 0, rotate: 0, transition: SPRING } }}>
+          {w + ' '}
+        </motion.span>
+      ))}
+    </motion.h2>
+  )
+}
+
+/* Barra de progresso de leitura no topo */
+function ScrollProgress() {
+  const { scrollYProgress } = useScroll()
+  const scaleX = useSpring(scrollYProgress, { stiffness: 140, damping: 30, mass: 0.4 })
+  return <motion.div className="scroll-progress" style={{ scaleX }} aria-hidden="true" />
+}
+
+/* Seção que "abre" ao entrar na tela: cresce e perde as bordas arredondadas */
+function Unfold({ children, className }: { children: ReactNode; className: string }) {
+  const ref = useRef<HTMLElement>(null)
+  const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'start 35%'] })
+  const scale = useTransform(scrollYProgress, [0, 1], [0.92, 1])
+  const radius = useTransform(scrollYProgress, [0, 1], [48, 0])
+  return <motion.section ref={ref} className={className} style={{ scale, borderRadius: radius }}>{children}</motion.section>
+}
+
+/* Cena do hero: inclina com o mouse e recua com a rolagem */
+function HeroScene() {
+  const ref = useRef<HTMLDivElement>(null)
+  const reduce = useReducedMotion()
+  const mx = useMotionValue(0), my = useMotionValue(0)
+  const rotY = useSpring(useTransform(mx, [-0.5, 0.5], [-7, 7]), { stiffness: 120, damping: 16 })
+  const rotX = useSpring(useTransform(my, [-0.5, 0.5], [6, -6]), { stiffness: 120, damping: 16 })
+  const { scrollY } = useScroll()
+  const y = useTransform(scrollY, [0, 700], [0, 110])
+  const op = useTransform(scrollY, [0, 600], [1, 0.35])
+  function move(e: React.PointerEvent) {
+    if (reduce || e.pointerType !== 'mouse') return
+    const r = ref.current!.getBoundingClientRect()
+    mx.set((e.clientX - r.left) / r.width - 0.5); my.set((e.clientY - r.top) / r.height - 0.5)
+  }
+  return (
+    <motion.div ref={ref} className="hero2-scene" onPointerMove={move} onPointerLeave={() => { mx.set(0); my.set(0) }}
+      initial={{ opacity: 0, y: 60, scale: 0.94 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ ...SPRING, delay: 0.3 }}
+      style={{ perspective: 1200 }}>
+      <motion.div style={{ rotateX: rotX, rotateY: rotY, y: reduce ? 0 : y, opacity: reduce ? 1 : op, transformStyle: 'preserve-3d' }}>
+        <Scene />
+      </motion.div>
+    </motion.div>
+  )
+}
+
+/* Formas do fundo do hero com parallax em velocidades diferentes */
+function HeroBg() {
+  const { scrollY } = useScroll()
+  const slow = useTransform(scrollY, [0, 800], [0, -120])
+  const fast = useTransform(scrollY, [0, 800], [0, -260])
+  return (
+    <div className="hero-bg" aria-hidden="true">
+      {[0, 1, 2, 3, 0, 1, 2, 3].map((k, n) => (
+        <motion.span key={n} className={`bg-shape s${n} qz-answer--${ANSWER[k].key}`} style={{ y: n % 2 ? fast : slow }}><Shape index={k} /></motion.span>
+      ))}
+    </div>
+  )
 }
 
 function CountUp({ to, suffix = '', decimals = 0 }: { to: number; suffix?: string; decimals?: number }) {
@@ -146,7 +227,9 @@ export default function Home() {
   }, [])
 
   return (
+    <MotionConfig reducedMotion="user">
     <div className="home">
+      <ScrollProgress />
       <header className={`home-header${scrolled ? ' scrolled' : ''}`}>
         <div className="home-header-in">
           <Link to="/" className="wordmark"><img src="/logo-wordmark.png" alt="Quizuu" /></Link>
@@ -163,9 +246,7 @@ export default function Home() {
       </header>
 
       <section className="hero2">
-        <div className="hero-bg" aria-hidden="true">
-          {[0, 1, 2, 3, 0, 1, 2, 3].map((k, n) => <span key={n} className={`bg-shape s${n} qz-answer--${ANSWER[k].key}`}><Shape index={k} /></span>)}
-        </div>
+        <HeroBg />
         <div className="hero2-in">
           <div className="hero2-copy">
             <span className="pill-badge"><i /> Gratuito para escolas e eventos</span>
@@ -185,7 +266,7 @@ export default function Home() {
               <li>Sem app para instalar</li><li>Até 200 por sala</li><li>Pronto em minutos</li>
             </ul>
           </div>
-          <div className="hero2-scene fade-in" style={{ animationDelay: '300ms' }}><Scene /></div>
+          <HeroScene />
         </div>
       </section>
 
@@ -197,7 +278,7 @@ export default function Home() {
 
       <section id="como-funciona" className="section">
         <div className="section-in">
-          <Reveal><span className="kicker">Como funciona</span><h2 className="h2x">Do zero ao pódio em três passos</h2></Reveal>
+          <Reveal><span className="kicker">Como funciona</span><Words text="Do zero ao pódio em três passos" /></Reveal>
           <ol className="steps2">
             <Reveal as="li" delay={0} className="step2">
               <div className="mock mock-editor">
@@ -231,11 +312,11 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="section dark">
+      <Unfold className="section dark">
         <div className="section-in split">
           <Reveal className="split-copy">
             <span className="kicker">Telão e celular sincronizados</span>
-            <h2 className="h2x">Cada toque chega ao telão na hora.</h2>
+            <Words text="Cada toque chega ao telão na hora." />
             <p className="lead2">O celular de quem joga mostra só as cores e formas, em tela cheia, para ninguém perder tempo lendo. O relógio que mede a velocidade é o do servidor, então o placar é justo para todos os aparelhos.</p>
             <ul className="ticks">
               <li>Resposta registrada em cerca de 0,2 segundo</li>
@@ -249,13 +330,13 @@ export default function Home() {
             <div className="phone small p-right"><div className="phone-screen ph-result"><div className="ph-verdict">✓</div><strong>Você acertou!</strong><span className="ph-gain">+985</span></div></div>
           </Reveal>
         </div>
-      </section>
+      </Unfold>
 
       <section className="section" id="votacoes">
         <div className="section-in poll-feature">
           <Reveal className="pf-copy">
             <span className="kicker">Novo · Votações ao vivo</span>
-            <h2 className="h2x">Sua plateia vota, e o resultado aparece no seu slide.</h2>
+            <Words text="Sua plateia vota, e o resultado aparece no seu slide." />
             <p className="lead2" style={{ color: 'var(--ink-muted)' }}>Monte uma sequência de perguntas de múltipla escolha ou nuvem de palavras. A plateia vota pelo QR code e o gráfico cresce ao vivo dentro do PowerPoint, enquanto você fala.</p>
             <ul className="ticks">
               <li>Múltipla escolha e nuvem de palavras</li>
@@ -309,7 +390,7 @@ export default function Home() {
 
       <section className="section soft">
         <div className="section-in">
-          <Reveal><span className="kicker">Para quem é</span><h2 className="h2x">Feito para quem fala para muita gente</h2></Reveal>
+          <Reveal><span className="kicker">Para quem é</span><Words text="Feito para quem fala para muita gente" /></Reveal>
           <div className="aud2">
             <Reveal className="aud2-card" delay={0}>
               <div className="aud2-icon qz-answer--red"><Shape index={0} /></div>
@@ -327,7 +408,7 @@ export default function Home() {
 
       <section className="section" id="planos">
         <div className="section-in">
-          <Reveal><span className="kicker">Planos</span><h2 className="h2x">Comece grátis. Assine quando quiser mais IA</h2>
+          <Reveal><span className="kicker">Planos</span><Words text="Comece grátis. Assine quando quiser mais IA" />
             <p className="lead2">Partidas e jogadores não têm limite em nenhum plano. O Pro libera a geração de quizzes com IA e mais espaço para guardar seus quizzes e votações.</p></Reveal>
           <div className="price-grid">
             <Reveal className="price-card">
@@ -408,5 +489,6 @@ export default function Home() {
         </div>
       </footer>
     </div>
+    </MotionConfig>
   )
 }

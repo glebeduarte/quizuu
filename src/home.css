@@ -111,8 +111,6 @@
 .lead2 { font-size: 18px; line-height: 1.6; opacity: .88; margin: 0 0 24px; max-width: 48ch; }
 
 /* Revelar ao rolar */
-.reveal { opacity: 0; transform: translateY(28px); transition: opacity .7s ease, transform .7s cubic-bezier(.2, .8, .2, 1); }
-.reveal.in { opacity: 1; transform: none; }
 
 /* Passos com mockups */
 .steps2 { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; }
@@ -366,3 +364,10 @@
 .price-card--pro li::before { background-color: #ffbe1a; }
 .price-tag { position: absolute; top: -14px; right: 24px; background: #ffbe1a; color: #3d1278; font-weight: 800; font-size: 14px; padding: 6px 14px; border-radius: 999px; box-shadow: 0 4px 0 #c48a00; }
 .price-note { margin: 0; font-size: 13px; text-align: center; }
+
+/* Motion */
+.scroll-progress { position: fixed; top: 0; left: 0; right: 0; height: 4px; background: var(--brand); transform-origin: 0 50%; z-index: 100; }
+.section.dark { transform-origin: 50% 0; will-change: transform; }
+.step2 { transition: box-shadow .25s ease; }
+.step2:hover { box-shadow: 0 18px 40px rgba(61, 18, 120, .14); }
+@media (prefers-reduced-motion: reduce) { .scroll-progress { display: none; } }
