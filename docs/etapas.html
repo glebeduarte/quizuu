@@ -79,8 +79,8 @@ h1{font:800 clamp(30px,6vw,44px)/1.05 var(--display);margin:8px 0 10px;text-wrap
 </div>
 
 <script type="application/json" id="state">
-{"updated":"14/10/2026, 23:40",
-"next":{"you":"Fazer uma partida de teste com 2 ou 3 celulares e me contar o que sentiu.","me":"Teste de carga com 200 jogadores (Fase 9)."},
+{"updated":"14/10/2026, 23:55",
+"next":{"you":"Fazer a partida piloto com público real e escolher o domínio oficial.","me":"Apontar o domínio quando você escolher e ajustar o que surgir no piloto."},
 "phases":[
 {"title":"Decisões e fundação","desc":"Fechar os pontos abertos e preparar o ambiente onde tudo vai rodar.","note":"Repositório criado e organizado com especificação e esquema do banco. Projeto Supabase Quizuu conectado (São Paulo).","ready":"ambiente pronto e decisões de produto tomadas.","tasks":[
  {"t":"Criar repositório no GitHub (glebeduarte/quizuu)","s":"done"},
@@ -124,9 +124,9 @@ h1{font:800 clamp(30px,6vw,44px)/1.05 var(--display);margin:8px 0 10px;text-wrap
  {"t":"Função que chama o Claude com tema, nível e quantidade","s":"todo"},
  {"t":"Gerar a partir de texto ou PDF colado","s":"todo"},
  {"t":"Revisão das perguntas antes de salvar","s":"todo"}]},
-{"title":"Teste de carga e lançamento","desc":"Garantir que aguenta a sala cheia e colocar no domínio oficial.","ready":"200 jogadores simultâneos sem atraso perceptível.","tasks":[
- {"t":"Simular 200 jogadores numa sala","s":"todo"},
- {"t":"Testar em celulares antigos e 4G fraco","s":"todo"},
+{"title":"Teste de carga e lançamento","desc":"Garantir que aguenta a sala cheia e colocar no domínio oficial.","note":"200 jogadores entraram juntos sem erro; 60 celulares receberam a pergunta em cerca de 42 ms; 200 respostas aceitas em cerca de 0,2 s cada. Em Android antigo com internet fraca, a tela do jogador fica pronta em cerca de 3 s.","ready":"200 jogadores simultâneos sem atraso perceptível.","tasks":[
+ {"t":"Simular 200 jogadores numa sala","s":"done"},
+ {"t":"Testar em celulares antigos e internet fraca (simulado)","s":"done"},
  {"t":"Apontar domínio oficial","s":"todo"},
  {"t":"Partida piloto com público real","s":"todo"}]}
 ]}
