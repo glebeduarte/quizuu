@@ -79,26 +79,26 @@ h1{font:800 clamp(30px,6vw,44px)/1.05 var(--display);margin:8px 0 10px;text-wrap
 </div>
 
 <script type="application/json" id="state">
-{"updated":"14/10/2026, 21:50",
-"next":{"you":"Revisar o design system e dizer se é produto pago ou ferramenta interna.","me":"Criar a área de imagens e começar o esqueleto do app com login (Fase 3)."},
+{"updated":"14/10/2026, 22:05",
+"next":{"you":"Importar o repositório quizuu na Vercel (vercel.com/new) com as duas variáveis do arquivo .env.example e me mandar o endereço gerado.","me":"Configurar o endereço no login do Supabase e começar o editor de quiz (Fase 4)."},
 "phases":[
 {"title":"Decisões e fundação","desc":"Fechar os pontos abertos e preparar o ambiente onde tudo vai rodar.","note":"Repositório criado e organizado com especificação e esquema do banco. Projeto Supabase Quizuu conectado (São Paulo).","ready":"ambiente pronto e decisões de produto tomadas.","tasks":[
  {"t":"Criar repositório no GitHub (glebeduarte/quizuu)","s":"done"},
  {"t":"Escrever a especificação no repositório","s":"done"},
  {"t":"Conectar o projeto Supabase do Quizuu","s":"done"},
  {"t":"Definir público principal: eventos e escolas","s":"done"},
- {"t":"Definir identidade visual (design system criado; logo pendente)","s":"doing"},
+ {"t":"Definir identidade visual (design system criado; logo tipográfica por enquanto)","s":"done"},
  {"t":"Decidir se é produto pago ou ferramenta interna","s":"todo"}]},
 {"title":"Banco de dados e segurança","desc":"Tabelas de quiz, sala, jogadores e respostas, com as regras de acesso.","note":"Esquema aplicado no Supabase: 7 tabelas, fórmula de pontuação e regras de acesso. Alertas de segurança zerados.","ready":"banco no ar, sem alertas de segurança.","tasks":[
  {"t":"Escrever o esquema (quizzes, perguntas, opções, salas, jogadores, respostas)","s":"done"},
  {"t":"Aplicar o esquema no Supabase","s":"done"},
  {"t":"Ativar regras de acesso (RLS) e conferir alertas","s":"done"},
  {"t":"Criar área de arquivos para imagens das perguntas","s":"todo"}]},
-{"title":"Esqueleto do app e login","desc":"Projeto React publicado, com login do organizador e as três telas base.","ready":"organizador entra com e-mail e vê o painel vazio.","tasks":[
- {"t":"Criar o projeto React + Tailwind no repositório","s":"todo"},
- {"t":"Login do organizador (e-mail com link mágico ou Google)","s":"todo"},
- {"t":"Rotas: painel, tela do host, tela do jogador","s":"todo"},
- {"t":"Publicar na Vercel com domínio provisório","s":"todo"}]},
+{"title":"Esqueleto do app e login","desc":"Projeto React publicado, com login do organizador e as três telas base.","note":"App pronto e compilando sem erros. Falta só importar na Vercel, que precisa ser feito pela sua conta.","ready":"organizador entra com e-mail e vê o painel vazio.","tasks":[
+ {"t":"Criar o projeto React no repositório, com as cores e fontes do design system","s":"done"},
+ {"t":"Login do organizador por link mágico no e-mail","s":"done"},
+ {"t":"Rotas: início, painel, tela do host, tela do jogador","s":"done"},
+ {"t":"Publicar na Vercel com domínio provisório","s":"doing"}]},
 {"title":"Criador de quiz","desc":"Montar, editar e organizar quizzes de múltipla escolha.","ready":"um quiz completo criado e salvo pelo painel.","tasks":[
  {"t":"Lista de quizzes do organizador","s":"todo"},
  {"t":"Editor de perguntas (texto, 2 a 4 opções, correta, tempo, pontos)","s":"todo"},
