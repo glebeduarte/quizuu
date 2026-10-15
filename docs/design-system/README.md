@@ -52,4 +52,12 @@ Quatro cores de resposta formam a identidade. Elas não são decoração: cada u
 - **Ranking**: ouro, prata e bronze para o pódio; destaque para "você" no celular.
 
 ## Logo
-Ainda não há logo. Até existir, o nome é escrito em Baloo 2, peso 800, em `brand` sobre `surface` ou em `on-color` sobre `stage`.
+O símbolo é um Q laranja em degradê, em forma de balão de fala, com um ponto de interrogação dentro. O nome é "Quiz" em ink escuro e "uu" no mesmo laranja do símbolo.
+
+- **Logo completa** (símbolo, nome e brilhos coloridos): capa de apresentação, materiais impressos, tela de abertura.
+- **Nome** (`quizuu-nome.png`): cabeçalho das telas sobre `surface`.
+- **Nome claro** (`quizuu-nome-claro.png`): cabeçalho sobre `stage` e no modo escuro. "Quiz" vira branco, "uu" continua laranja.
+- **Símbolo** (`quizuu-simbolo.png`): ícone do app, favicon, avatar de redes sociais.
+- Altura mínima do nome: 24px. Respiro em volta igual à altura do "u".
+- Não recolorir, não esticar, não colocar sobre as cores de resposta.
+- Os brilhos ao redor da logo completa são decorativos e não entram na paleta da interface.
