@@ -235,19 +235,22 @@ export default function VotacaoEditor() {
                 </>}
 
                 {plat === 'canva' && <>
-                  <CopyField label="Link para incorporar no Canva" value={embedUrl(poll.code, poll.host_key)}
-                    hint="Mostra o resultado ao vivo e segue a pergunta que você abrir aqui." />
+                  <p className="muted" style={{ margin: 0, fontSize: 14 }}>O Canva só mostra páginas ao vivo de sites aprovados pelo serviço de incorporação que ele usa. Enquanto o Quizuu não está nessa lista, o caminho é um slide com o QR code e um link que abre o resultado com um clique.</p>
+                  <div className="btn-row">
+                    <button className="qz-btn qz-btn--primary" onClick={() => downloadSlide()}>Baixar slide geral (PNG)</button>
+                  </div>
                   <details className="per-slide">
-                    <summary>Um link por pergunta (uma página do Canva para cada)</summary>
-                    {qs.map((q, i) => <CopyField key={q.id} label={`Pergunta ${i + 1}: ${q.prompt || 'sem enunciado'}`} value={embedUrl(poll.code, poll.host_key, i + 1)} />)}
+                    <summary>Um slide por pergunta</summary>
+                    <div className="slide-list">
+                      {qs.map((q, i) => <button key={q.id} className="qz-btn qz-btn--ghost" onClick={() => downloadSlide(i + 1)}>Baixar pergunta {i + 1}: {q.prompt.slice(0, 40) || 'sem enunciado'}</button>)}
+                    </div>
                   </details>
+                  <CopyField label="Tela do resultado" value={screenUrl(poll.code, poll.host_key)} />
                   <ol className="howto">
-                    <li>Copie o link acima e cole direto na página do Canva (Ctrl+V ou Cmd+V). O Canva transforma o link em um quadro incorporado.</li>
-                    <li>Se ele virar só texto, use <strong>Apps → Incorporar</strong> (Embed), cole o link e clique em <strong>Adicionar ao design</strong>.</li>
-                    <li>Ajuste o quadro para ocupar a página. No modo <strong>Apresentar</strong>, o resultado atualiza sozinho.</li>
+                    <li>No Canva, envie o PNG em <strong>Uploads</strong> e coloque na página. Ele já vem em 1920×1080, o tamanho de uma apresentação.</li>
+                    <li>Selecione a imagem, clique no ícone de <strong>link</strong> (ou Ctrl+K / Cmd+K) e cole o link da tela do resultado.</li>
+                    <li>No modo <strong>Apresentar</strong>, um clique na imagem abre o resultado ao vivo em outra aba. Deixe essa aba em tela cheia e volte ao Canva quando quiser.</li>
                   </ol>
-                  <button className="qz-btn qz-btn--secondary" onClick={() => downloadSlide()}>Baixar slide com QR code (PNG)</button>
-                  <p className="muted" style={{ fontSize: 13, margin: 0 }}>O quadro incorporado depende da conexão no momento da apresentação. Coloque antes um slide com o QR code para a plateia entrar.</p>
                 </>}
 
                 {plat === 'keynote' && <>
