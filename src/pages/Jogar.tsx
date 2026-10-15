@@ -3,6 +3,8 @@ import { Link, useSearchParams } from 'react-router-dom'
 import type { RealtimeChannel } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 import { ANSWER, Shape } from '../lib/shapes'
+import { sfx, unlock } from '../lib/sound'
+import SoundToggle from '../lib/SoundToggle'
 import { channelFor, formatPoints, loadPlayer, savePlayer, type GameState, type PlayerSave } from '../lib/game'
 
 type Result = { answered: boolean; is_correct: boolean; points: number; score: number; streak: number; rank: number; total: number }
@@ -40,9 +42,13 @@ export default function Jogar() {
     })
   }, [])
 
-  const fetchResult = useCallback(async (p: PlayerSave) => {
+  const fetchResult = useCallback(async (p: PlayerSave, withSound = false) => {
     const { data } = await supabase.rpc('my_result', { p_player_id: p.playerId, p_token: p.token })
-    if (data?.[0]) setResult(data[0] as Result)
+    if (data?.[0]) {
+      const r = data[0] as Result
+      if (withSound) (r.is_correct ? sfx.correct : sfx.wrong)()
+      setResult(r)
+    }
   }, [])
 
   useEffect(() => {
@@ -52,7 +58,7 @@ export default function Jogar() {
       const s = payload as GameState
       setState(s)
       if (s.phase === 'question') { setPicked(null); setResult(null); setRemaining(s.timeLimit) }
-      if (s.phase === 'reveal' || s.phase === 'podium') fetchResult(me)
+      if (s.phase === 'reveal' || s.phase === 'podium') fetchResult(me, s.phase === 'reveal')
     }).on('broadcast', { event: 'kicked' }, ({ payload }) => {
       if ((payload as { playerId: string }).playerId === me.playerId) { savePlayer(null); setMe(null); setMsg('Você foi removido da sala pelo organizador.') }
     }).subscribe((status) => {
@@ -74,7 +80,7 @@ export default function Jogar() {
       if (pin.length !== 6) return setMsg('O PIN tem 6 números.')
       setMsg(''); setStep('nick'); return
     }
-    setBusy(true); setMsg('')
+    setBusy(true); setMsg(''); unlock()
     const { data, error } = await supabase.rpc('join_session', { p_pin: pin, p_nickname: nick })
     setBusy(false)
     if (error || !data?.[0]) {
@@ -90,6 +96,7 @@ export default function Jogar() {
   async function answer(i: number) {
     if (!me || state.phase !== 'question' || picked !== null) return
     setPicked(i)
+    sfx.tap()
     navigator.vibrate?.(30)
     const { data } = await supabase.rpc('submit_answer', { p_player_id: me.playerId, p_token: me.token, p_option_id: state.optionIds[i] })
     if (!data?.[0]?.accepted) setMsg('O tempo acabou antes da sua resposta chegar.')
@@ -123,7 +130,10 @@ export default function Jogar() {
     <div className="page on-stage player">
       <header className="topbar">
         <strong className="player-nick">{me.nickname}</strong>
-        {result && <span className="player-score">{formatPoints(result.score)} pts</span>}
+        <span className="btn-row" style={{ alignItems: 'center' }}>
+          {result && <span className="player-score">{formatPoints(result.score)} pts</span>}
+          <SoundToggle />
+        </span>
       </header>
 
       {state.phase === 'lobby' && (

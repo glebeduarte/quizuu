@@ -5,6 +5,8 @@ import { supabase } from '../lib/supabase'
 import { ANSWER, Shape } from '../lib/shapes'
 import { channelFor, formatPin, formatPoints, type GameState } from '../lib/game'
 import type { RealtimeChannel } from '@supabase/supabase-js'
+import { sfx, stopMusic, unlock } from '../lib/sound'
+import SoundToggle from '../lib/SoundToggle'
 
 type Option = { id: string; label: string; is_correct: boolean; position: number }
 type Question = { id: string; prompt: string; kind: string; time_limit_s: number; points_multiplier: number; position: number; options: Option[] }
@@ -24,6 +26,28 @@ export default function Host() {
   const stateRef = useRef(state); stateRef.current = state
   const endsAt = useRef(0)
   const revealedFor = useRef(-1)
+  const lastLeft = useRef(99)
+  const prevCount = useRef(0)
+  const [soundOn, setSoundOn] = useState(false)
+
+  // trilha de cada fase
+  const phaseKey = state.phase + ('qIndex' in state ? state.qIndex : '')
+  useEffect(() => {
+    if (!soundOn) return
+    const p = stateRef.current.phase
+    if (p === 'lobby') sfx.lobby()
+    else if (p === 'question') { sfx.questionStart(); const t = setTimeout(() => sfx.questionMusic(), 900); return () => clearTimeout(t) }
+    else if (p === 'reveal') sfx.timeUp()
+    else if (p === 'leaderboard') sfx.drumroll(1.2)
+    else if (p === 'podium') sfx.fanfare()
+  }, [phaseKey, soundOn])
+  useEffect(() => () => stopMusic(), [])
+
+  // um "pop" para cada jogador que entra
+  useEffect(() => {
+    if (soundOn && state.phase === 'lobby' && players.length > prevCount.current) sfx.join()
+    prevCount.current = players.length
+  }, [players.length, soundOn, state.phase])
 
   const broadcast = useCallback((s: GameState) => {
     setState(s)
@@ -98,6 +122,8 @@ export default function Host() {
     const tick = setInterval(async () => {
       const left = Math.max(0, Math.ceil((endsAt.current - Date.now()) / 1000))
       setRemaining(left)
+      if (left !== lastLeft.current && left > 0 && left <= 5) sfx.tick(left <= 1)
+      lastLeft.current = left
       const { count } = await supabase.from('answers').select('id', { count: 'exact', head: true })
         .eq('session_id', sessionId!).eq('question_id', q.id)
       setAnswered(count ?? 0)
@@ -139,11 +165,15 @@ export default function Host() {
   const q = 'qIndex' in state ? questions[state.qIndex] : null
 
   return (
-    <div className="page on-stage host">
+    <div className="page on-stage host" onPointerDown={() => { if (!soundOn) { unlock(); setSoundOn(true) } }}>
       <header className="topbar">
         <Link to="/painel" className="wordmark"><img src="/logo-wordmark-light.png" alt="Quizuu" /></Link>
-        <span className="muted">{title}{'qIndex' in state ? ` · ${state.qIndex + 1} de ${state.total}` : ''}</span>
+        <span className="muted host-title">{title}{'qIndex' in state ? ` · ${state.qIndex + 1} de ${state.total}` : ''}</span>
+        <SoundToggle onEnable={() => setSoundOn(true)} />
       </header>
+      {!soundOn && state.phase === 'lobby' && (
+        <button className="sound-cta content" onClick={() => { unlock(); setSoundOn(true) }}>Toque aqui para ligar a música do telão</button>
+      )}
       {error && <p className="notice notice--err content">{error}</p>}
 
       {state.phase === 'lobby' && (
