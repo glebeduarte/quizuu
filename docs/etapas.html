@@ -1,0 +1,214 @@
+<title>Etapas do Quizuu</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<style id="page-style">
+/* Layout: coluna única de leitura, resumo no topo, fases como blocos numerados (a ordem é real) */
+:root{
+  --bg:#f6f5fb; --surface:#ffffff; --fg:#1d1a2e; --muted:#6b6785; --line:#e3e0ef;
+  --accent:#5b3fd9; --accent-soft:#ece8ff;
+  --done:#1f8a5b; --done-soft:#e3f5ec; --doing:#b86e00; --doing-soft:#fff1d9; --todo:#8a86a3; --todo-soft:#efeef5;
+  --display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --body:"Figtree",ui-sans-serif,system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#13111c; --surface:#1c1929; --fg:#efedf8; --muted:#a29dbd; --line:#2e2a40;
+  --accent:#a593ff; --accent-soft:#2a2350;
+  --done:#4fd197; --done-soft:#173226; --doing:#f4b54d; --doing-soft:#3a2a10; --todo:#8f8aa8; --todo-soft:#25222f; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#13111c; --surface:#1c1929; --fg:#efedf8; --muted:#a29dbd; --line:#2e2a40;
+  --accent:#a593ff; --accent-soft:#2a2350;
+  --done:#4fd197; --done-soft:#173226; --doing:#f4b54d; --doing-soft:#3a2a10; --todo:#8f8aa8; --todo-soft:#25222f; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font:16px/1.55 var(--body)}
+.wrap{max-width:820px;margin:0 auto;padding-block:40px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:28px}
+.eyebrow{font:500 12px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+h1{font:800 clamp(30px,6vw,44px)/1.05 var(--display);margin:8px 0 10px;text-wrap:balance}
+.lead{color:var(--muted);margin:0;max-width:62ch}
+.summary{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:16px}
+@media (max-width:640px){.summary{grid-template-columns:1fr}}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;min-width:0}
+.box h2{font:500 12px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 12px}
+.pct{font:800 56px/1 var(--display);font-variant-numeric:tabular-nums}
+.bar{height:8px;border-radius:99px;background:var(--todo-soft);overflow:hidden;margin:14px 0 12px;display:flex}
+.bar i{display:block;height:100%}
+.counts{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums}
+.counts b{color:var(--fg)}
+.next p{margin:0 0 8px}
+.next .upd{font-size:13px;color:var(--muted);margin-top:12px}
+.hint{font-size:14px;color:var(--muted);margin:0}
+.phases{display:grid;gap:12px}
+.phase{background:var(--surface);border:1px solid var(--line);border-radius:14px}
+.phase>summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:start;padding:18px 20px}
+.phase>summary::-webkit-details-marker{display:none}
+.phase>summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:14px}
+.num{font:700 15px/1 var(--mono);color:var(--accent);background:var(--accent-soft);border-radius:10px;width:40px;height:40px;display:grid;place-items:center}
+.phase.is-done .num{background:var(--done-soft);color:var(--done)}
+.ph-title{font:700 19px/1.25 var(--display);margin:0 0 4px}
+.ph-desc{margin:0;color:var(--muted);font-size:15px}
+.mini{font-size:13px;color:var(--muted);margin-top:6px;font-variant-numeric:tabular-nums}
+.pill{font:600 12px/1 var(--body);padding:7px 10px;border-radius:99px;white-space:nowrap}
+.pill.done{background:var(--done-soft);color:var(--done)}
+.pill.doing{background:var(--doing-soft);color:var(--doing)}
+.pill.todo{background:var(--todo-soft);color:var(--todo)}
+.body{padding:0 20px 18px 74px;display:grid;gap:12px}
+@media (max-width:520px){.body{padding-left:20px}}
+.note{margin:0;font-size:15px}
+.tasks{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.task{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;background:var(--bg);border:1px solid transparent;cursor:pointer;text-align:left;width:100%;font:inherit;color:inherit}
+.task:hover{border-color:var(--line)}
+.task:focus-visible{outline:2px solid var(--accent)}
+.task[disabled]{cursor:default}
+.task .t{display:flex;gap:10px;align-items:baseline;min-width:0}
+.task .mk{font-family:var(--mono);width:14px;flex:none}
+.task.done .mk{color:var(--done)} .task.doing .mk{color:var(--doing)} .task.todo .mk{color:var(--todo)}
+.task.done .lbl{color:var(--muted)}
+.ready{margin:0;font-size:14px;color:var(--muted)}
+.ready b{color:var(--fg);font-weight:600}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:14px}
+@media (prefers-reduced-motion:no-preference){.bar i{transition:width .4s}}
+</style>
+
+<div class="wrap" id="root">
+  <header>
+    <div class="eyebrow">Quizuu · Plataforma de quiz ao vivo</div>
+    <h1>Etapas da implementação</h1>
+    <p class="lead">Do banco de dados ao lançamento, em fases que entram no ar uma de cada vez.</p>
+  </header>
+  <p class="hint">Carregando etapas…</p>
+</div>
+
+<script type="application/json" id="state">
+{"updated":"14/10/2026, 21:10",
+"next":{"you":"Me dizer qual projeto Supabase é o do Quizuu (não apareceu na organização conectada) e definir o público principal.","me":"Aplicar o esquema do banco e começar o esqueleto do app (Fase 3)."},
+"phases":[
+{"title":"Decisões e fundação","desc":"Fechar os pontos abertos e preparar o ambiente onde tudo vai rodar.","note":"Repositório criado e organizado com especificação e esquema do banco. O projeto Supabase do Quizuu ainda não foi localizado na conta conectada.","ready":"ambiente pronto e decisões de produto tomadas.","tasks":[
+ {"t":"Criar repositório no GitHub (glebeduarte/quizuu)","s":"done"},
+ {"t":"Escrever a especificação no repositório","s":"done"},
+ {"t":"Conectar o projeto Supabase do Quizuu","s":"doing"},
+ {"t":"Definir público principal (escola, eventos, empresas)","s":"todo"},
+ {"t":"Definir identidade visual (cores, logo)","s":"todo"},
+ {"t":"Decidir se é produto pago ou ferramenta interna","s":"todo"}]},
+{"title":"Banco de dados e segurança","desc":"Tabelas de quiz, sala, jogadores e respostas, com as regras de acesso.","note":"Esquema já escrito no repositório: 7 tabelas, fórmula de pontuação e regras de acesso por dono.","ready":"banco no ar, sem alertas de segurança.","tasks":[
+ {"t":"Escrever o esquema (quizzes, perguntas, opções, salas, jogadores, respostas)","s":"done"},
+ {"t":"Aplicar o esquema no Supabase","s":"todo"},
+ {"t":"Ativar regras de acesso (RLS) e conferir alertas","s":"todo"},
+ {"t":"Criar área de arquivos para imagens das perguntas","s":"todo"}]},
+{"title":"Esqueleto do app e login","desc":"Projeto React publicado, com login do organizador e as três telas base.","ready":"organizador entra com e-mail e vê o painel vazio.","tasks":[
+ {"t":"Criar o projeto React + Tailwind no repositório","s":"todo"},
+ {"t":"Login do organizador (e-mail com link mágico ou Google)","s":"todo"},
+ {"t":"Rotas: painel, tela do host, tela do jogador","s":"todo"},
+ {"t":"Publicar na Vercel com domínio provisório","s":"todo"}]},
+{"title":"Criador de quiz","desc":"Montar, editar e organizar quizzes de múltipla escolha.","ready":"um quiz completo criado e salvo pelo painel.","tasks":[
+ {"t":"Lista de quizzes do organizador","s":"todo"},
+ {"t":"Editor de perguntas (texto, 2 a 4 opções, correta, tempo, pontos)","s":"todo"},
+ {"t":"Upload de imagem por pergunta","s":"todo"},
+ {"t":"Reordenar, duplicar e excluir perguntas","s":"todo"}]},
+{"title":"Sala ao vivo","desc":"PIN, QR code e lobby mostrando quem entrou em tempo real.","ready":"20 celulares entram na mesma sala e aparecem no telão.","tasks":[
+ {"t":"Gerar sala com PIN de 6 dígitos e QR code","s":"todo"},
+ {"t":"Entrada do jogador por PIN + apelido (filtro de palavrões)","s":"todo"},
+ {"t":"Lobby com presença em tempo real e botão de remover","s":"todo"},
+ {"t":"Reconexão automática do jogador","s":"todo"}]},
+{"title":"Partida e pontuação","desc":"O coração do sistema: tempo medido no servidor e pontos por velocidade.","ready":"partida inteira jogada com ranking correto.","tasks":[
+ {"t":"Função de abrir pergunta (marca o tempo no servidor)","s":"todo"},
+ {"t":"Função de responder (valida, mede tempo, calcula pontos)","s":"todo"},
+ {"t":"Cronômetro sincronizado e encerramento automático","s":"todo"},
+ {"t":"Revelação com gráfico de respostas","s":"todo"},
+ {"t":"Sequência de acertos e desempate por tempo","s":"todo"}]},
+{"title":"Ranking, pódio e relatórios","desc":"Momento de festa no fim e dados para o organizador depois.","ready":"pódio animado e relatório exportável.","tasks":[
+ {"t":"Ranking parcial no telão e posição no celular","s":"todo"},
+ {"t":"Pódio final com top 3","s":"todo"},
+ {"t":"Relatório da partida (acertos por pergunta, tempo médio)","s":"todo"},
+ {"t":"Exportar resultados em planilha","s":"todo"}]},
+{"title":"Perguntas geradas por IA","desc":"Criar um quiz inteiro a partir de um tema ou de um texto colado.","ready":"quiz de 10 perguntas gerado e editável em segundos.","tasks":[
+ {"t":"Função que chama o Claude com tema, nível e quantidade","s":"todo"},
+ {"t":"Gerar a partir de texto ou PDF colado","s":"todo"},
+ {"t":"Revisão das perguntas antes de salvar","s":"todo"}]},
+{"title":"Teste de carga e lançamento","desc":"Garantir que aguenta a sala cheia e colocar no domínio oficial.","ready":"200 jogadores simultâneos sem atraso perceptível.","tasks":[
+ {"t":"Simular 200 jogadores numa sala","s":"todo"},
+ {"t":"Testar em celulares antigos e 4G fraco","s":"todo"},
+ {"t":"Apontar domínio oficial","s":"todo"},
+ {"t":"Partida piloto com público real","s":"todo"}]}
+]}
+</script>
+
+<script id="app-script">
+(function(){
+  const LABEL={done:"Feito",doing:"Em andamento",todo:"Pendente"};
+  const MARK={done:"✓",doing:"•",todo:"○"};
+  const NEXT={todo:"doing",doing:"done",done:"todo"};
+  let state=JSON.parse(document.getElementById("state").textContent);
+  let api=null, saving=false;
+  const root=document.getElementById("root");
+  const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const phaseStatus=p=>p.tasks.every(t=>t.s==="done")?"done":p.tasks.some(t=>t.s!=="todo")?"doing":"todo";
+  const PHLABEL={done:"Concluída",doing:"Em andamento",todo:"A fazer"};
+
+  function render(){
+    const all=state.phases.flatMap(p=>p.tasks);
+    const n={done:0,doing:0,todo:0}; all.forEach(t=>n[t.s]++);
+    const pct=Math.round((n.done+n.doing*.5)/all.length*100);
+    const open=new Set([...root.querySelectorAll("details[open]")].map(d=>d.dataset.i));
+    root.innerHTML=`
+    <header>
+      <div class="eyebrow">Quizuu · Plataforma de quiz ao vivo</div>
+      <h1>Etapas da implementação</h1>
+      <p class="lead">Do banco de dados ao lançamento, em fases que entram no ar uma de cada vez.</p>
+    </header>
+    <section class="summary">
+      <div class="box"><h2>Andamento geral</h2>
+        <div class="pct">${pct}%</div>
+        <div class="bar" aria-hidden="true"><i style="width:${n.done/all.length*100}%;background:var(--done)"></i><i style="width:${n.doing/all.length*100}%;background:var(--doing)"></i></div>
+        <div class="counts"><span><b>${n.done}</b> feitas</span><span><b>${n.doing}</b> em andamento</span><span><b>${n.todo}</b> pendentes</span></div>
+      </div>
+      <div class="box next"><h2>Próximo passo</h2>
+        <p><b>Você:</b> ${esc(state.next.you)}</p>
+        <p><b>Eu:</b> ${esc(state.next.me)}</p>
+        <div class="upd">Atualizado em ${esc(state.updated)}</div>
+      </div>
+    </section>
+    <p class="hint">${api?"Clique numa tarefa para mudar o status: pendente, em andamento, feito.":"Visualização somente leitura."}</p>
+    <section class="phases">${state.phases.map((p,i)=>{
+      const st=phaseStatus(p), d=p.tasks.filter(t=>t.s==="done").length;
+      const isOpen=open.size?open.has(String(i)):st==="doing";
+      return `<details class="phase is-${st}" data-i="${i}" ${isOpen?"open":""}>
+        <summary><span class="num">${st==="done"?"✓":String(i+1).padStart(2,"0")}</span>
+          <div><h3 class="ph-title">${esc(p.title)}</h3><p class="ph-desc">${esc(p.desc)}</p><div class="mini">${d} de ${p.tasks.length} tarefas</div></div>
+          <span class="pill ${st}">${PHLABEL[st]}</span></summary>
+        <div class="body">
+          ${p.note?`<p class="note">${esc(p.note)}</p>`:""}
+          <ul class="tasks">${p.tasks.map((t,j)=>`<li><button class="task ${t.s}" data-p="${i}" data-t="${j}" ${api?"":"disabled"}>
+            <span class="t"><span class="mk">${MARK[t.s]}</span><span class="lbl">${esc(t.t)}</span></span>
+            <span class="pill ${t.s}">${LABEL[t.s]}</span></button></li>`).join("")}</ul>
+          <p class="ready"><b>Fica pronto:</b> ${esc(p.ready)}</p>
+        </div></details>`;}).join("")}</section>`;
+  }
+
+  function toast(msg){const el=document.createElement("div");el.className="toast";el.textContent=msg;document.body.appendChild(el);setTimeout(()=>el.remove(),2200);}
+
+  function buildDoc(){
+    const d=new Date(), p=x=>String(x).padStart(2,"0");
+    state.updated=`${p(d.getDate())}/${p(d.getMonth()+1)}/${d.getFullYear()}, ${p(d.getHours())}:${p(d.getMinutes())}`;
+    const head='<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style></head><body>';
+    const links=[...document.querySelectorAll('link[href*="fonts.g"]')].map(l=>l.outerHTML).join("");
+    return head+'<title>Etapas do Quizuu</title><meta name="claude:viewport-fit-sides" content="cover">'+links
+      +document.getElementById("page-style").outerHTML
+      +'<div class="wrap" id="root"><p class="hint">Carregando etapas…</p></div>'
+      +'<script type="application/json" id="state">'+JSON.stringify(state).replace(/</g,"\\u003c")+'<\/script>'
+      +document.getElementById("app-script").outerHTML+'</body></html>';
+  }
+
+  root.addEventListener("click",async e=>{
+    const b=e.target.closest(".task"); if(!b||!api||saving) return;
+    const t=state.phases[+b.dataset.p].tasks[+b.dataset.t];
+    t.s=NEXT[t.s]; render(); saving=true;
+    try{ await api.publish(buildDoc()); }
+    catch(err){ t.s=Object.keys(NEXT).find(k=>NEXT[k]===t.s); render();
+      toast(err&&err.code==="conflict"?"Outra pessoa salvou antes. A página vai recarregar.":"Não foi possível salvar. Tente de novo."); }
+    finally{ saving=false; }
+  });
+
+  render();
+  if(window.claude&&window.claude.use){ window.claude.use("artifact").then(a=>{ if(a){api=a;render();} }).catch(()=>{}); }
+})();
+</script>
