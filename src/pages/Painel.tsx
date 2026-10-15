@@ -5,6 +5,7 @@ import { useAuth } from '../lib/auth'
 import { randomPin } from '../lib/game'
 import { PanelTabs } from './Votacoes'
 import { useIsAdmin } from './Admin'
+import { limiteMsg, usePlano } from '../lib/plan'
 
 type Partida = { id: string; created_at: string; status: string; quizzes: { title: string } | null; players: { count: number }[] }
 type Quiz = { id: string; title: string; updated_at: string; questions: { count: number }[] }
@@ -13,6 +14,7 @@ export default function Painel() {
   const { session } = useAuth()
   const navigate = useNavigate()
   const isAdmin = useIsAdmin()
+  const { plano } = usePlano()
   const [quizzes, setQuizzes] = useState<Quiz[] | null>(null)
   const [creating, setCreating] = useState(false)
   const [partidas, setPartidas] = useState<Partida[]>([])
@@ -31,7 +33,7 @@ export default function Painel() {
     setCreating(true); setError('')
     const { data, error } = await supabase.from('quizzes')
       .insert({ owner_id: session!.user.id, title: 'Quiz sem título' }).select('id').single()
-    if (error || !data) { setError('Não foi possível criar o quiz. Tente de novo.'); setCreating(false); return }
+    if (error || !data) { setError(limiteMsg(error) ?? 'Não foi possível criar o quiz. Tente de novo.'); setCreating(false); return }
     navigate(`/quiz/${data.id}`)
   }
 
@@ -63,6 +65,7 @@ export default function Painel() {
         <Link to="/" className="wordmark"><picture><source srcSet="/logo-wordmark-light.png" media="(prefers-color-scheme: dark)" /><img src="/logo-wordmark.png" alt="Quizuu" /></picture></Link>
         <div className="btn-row" style={{ alignItems: 'center' }}>
           <span className="muted" style={{ fontSize: 14 }}>{session?.user.email}</span>
+          <Link to="/plano" className="qz-btn qz-btn--ghost" style={{ textDecoration: 'none' }}>Meu plano</Link>
           {isAdmin && <Link to="/admin" className="qz-btn qz-btn--secondary" style={{ textDecoration: 'none' }}>Admin</Link>}
           <button className="qz-btn qz-btn--ghost" onClick={() => supabase.auth.signOut()}>Sair</button>
         </div>
@@ -70,13 +73,20 @@ export default function Painel() {
       <main className="content" style={{ display: 'grid', gap: 'var(--space-6)', alignContent: 'start' }}>
         <PanelTabs active="quizzes" />
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
-          <h1 style={{ fontSize: 32 }}>Meus quizzes</h1>
+          <div style={{ display: 'grid', gap: 4 }}>
+            <h1 style={{ fontSize: 32 }}>Meus quizzes</h1>
+            {plano && plano.plan !== 'admin' && (
+              <span className="muted" style={{ fontSize: 14 }}>
+                {plano.quizzes} de {plano.limits.quizzes} quizzes · plano {plano.plan === 'pro' ? 'Pro' : 'Grátis'} · <Link to="/plano">{plano.plan === 'pro' ? 'Meu plano' : 'Assinar o Pro'}</Link>
+              </span>
+            )}
+          </div>
           <div className="btn-row">
             <Link to="/gerar" className="qz-btn qz-btn--secondary" style={{ textDecoration: 'none' }}>✨ Gerar com IA</Link>
             <button className="qz-btn qz-btn--primary" onClick={novo} disabled={creating}>{creating ? 'Criando…' : 'Novo quiz'}</button>
           </div>
         </div>
-        {error && <p className="notice notice--err">{error}</p>}
+        {error && <p className="notice notice--err">{error} {error.includes('limite') && <Link to="/plano">Ver planos</Link>}</p>}
         {quizzes === null ? (
           <p className="muted">Carregando…</p>
         ) : quizzes.length === 0 ? (

@@ -16,6 +16,7 @@ import VotacaoEditor from './pages/VotacaoEditor'
 import Votar from './pages/Votar'
 import Tela from './pages/Tela'
 import Admin from './pages/Admin'
+import Plano from './pages/Plano'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -33,7 +34,9 @@ createRoot(document.getElementById('root')!).render(
           <Route path="/host/:sessionId" element={<RequireAuth><Host /></RequireAuth>} />
           <Route path="/votacoes" element={<RequireAuth><Votacoes /></RequireAuth>} />
           <Route path="/votacao/:id" element={<RequireAuth><VotacaoEditor /></RequireAuth>} />
+          <Route path="/plano" element={<RequireAuth><Plano /></RequireAuth>} />
           <Route path="/admin" element={<RequireAuth><Admin /></RequireAuth>} />
+          <Route path="/admin/:secao" element={<RequireAuth><Admin /></RequireAuth>} />
           <Route path="/v/:code" element={<Votar />} />
           <Route path="/v/:code/tela" element={<Tela />} />
           <Route path="*" element={<Home />} />

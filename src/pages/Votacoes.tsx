@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { limiteMsg } from '../lib/plan'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/auth'
 import { randomCode } from '../lib/poll'
@@ -36,6 +37,7 @@ export default function Votacoes() {
         await supabase.from('poll_questions').insert({ poll_id: data.id, position: 1, kind: 'choice', prompt: '', options: ['', ''] })
         navigate(`/votacao/${data.id}`); return
       }
+      if (error && limiteMsg(error)) { setError(limiteMsg(error)!); setBusy(false); return }
       if (error && error.code !== '23505') break
     }
     setError('Não foi possível criar a votação. Tente de novo.'); setBusy(false)

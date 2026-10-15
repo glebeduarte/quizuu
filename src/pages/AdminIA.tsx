@@ -53,7 +53,7 @@ export default function AdminIA() {
     return total ? o.reduce((a, x) => a + x.custo_medio * x.geracoes, 0) / total : 0
   }, [d])
 
-  if (!d || !cfg) return <section className="admin-sec"><h2>IA (Gemini)</h2>{erro ? <p className="notice notice--err">{erro}</p> : <p className="muted">Carregando…</p>}</section>
+  if (!d || !cfg) return <section className="admin-sec">{erro ? <p className="notice notice--err">{erro}</p> : <p className="muted">Carregando…</p>}</section>
 
   const semPreco = !d.config.price_in && !d.config.price_out
   const pct = d.config.budget ? Math.min(100, (d.mes.custo / d.config.budget) * 100) : 0
@@ -65,7 +65,6 @@ export default function AdminIA() {
 
   return (
     <section className="admin-sec">
-      <h2>IA (Gemini)</h2>
       {erro && <p className="notice notice--err">{erro}</p>}
       {ok && <p className="notice notice--ok">{ok}</p>}
 
