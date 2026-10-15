@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { QRCodeCanvas } from 'qrcode.react'
 import { supabase } from '../lib/supabase'
 import { ANSWER, Shape } from '../lib/shapes'
-import { pollChannel, screenUrl, voteUrl } from '../lib/poll'
+import { embedUrl, pollChannel, screenUrl, voteUrl } from '../lib/poll'
 
 type Q = { id: string; kind: 'choice' | 'words'; prompt: string; options: string[] }
 type Poll = { id: string; title: string; code: string; host_key: string; current_position: number; is_open: boolean }
@@ -83,6 +83,37 @@ export default function VotacaoEditor() {
     await supabase.from('poll_votes').delete().eq('poll_id', poll.id)
     setConfirmReset(false); setNotice({ kind: 'ok', text: 'Votos zerados.' })
     control({ position: 1 })
+  }
+
+  const [plat, setPlat] = useState<'ppt' | 'canva' | 'keynote'>('ppt')
+
+  /* Slide 1920×1080 com QR e pergunta, para Keynote, Canva ou qualquer apresentação */
+  function downloadSlide(n?: number) {
+    const canvas = qrRef.current?.querySelector('canvas'); if (!canvas || !poll) return
+    const W = 1920, H = 1080, out = document.createElement('canvas'); out.width = W; out.height = H
+    const g = out.getContext('2d')!
+    g.fillStyle = '#3d1278'; g.fillRect(0, 0, W, H)
+    const shapes: [string, number, number][] = [['#e2332b', 120, 120], ['#e8620c', 1800, 160], ['#ffbe1a', 140, 960], ['#7a2fe0', 1780, 940]]
+    shapes.forEach(([c, x, y]) => { g.fillStyle = c; g.beginPath(); g.arc(x, y, 46, 0, Math.PI * 2); g.fill() })
+    g.fillStyle = '#ffbe1a'; g.font = '800 40px Nunito, sans-serif'; g.textAlign = 'left'
+    g.fillText(n ? `PERGUNTA ${n} DE ${qs.length}` : 'VOTAÇÃO AO VIVO', 160, 300)
+    const text = n ? (qs[n - 1]?.prompt || title) : title
+    g.fillStyle = '#ffffff'; g.font = '800 84px "Baloo 2", sans-serif'
+    const words = text.split(' '); const lines: string[] = []; let line = ''
+    words.forEach((w) => { const t = line ? `${line} ${w}` : w; if (g.measureText(t).width > 1000 && line) { lines.push(line); line = w } else line = t })
+    if (line) lines.push(line)
+    lines.slice(0, 5).forEach((l, k) => g.fillText(l, 160, 410 + k * 96))
+    g.fillStyle = '#e9dcff'; g.font = '700 40px Nunito, sans-serif'
+    g.fillText('Aponte a câmera do celular para o QR code', 160, 900)
+    const box = 560, bx = W - box - 170, by = (H - box) / 2 - 30
+    g.fillStyle = '#ffffff'; g.beginPath(); g.roundRect(bx, by, box, box + 110, 40); g.fill()
+    g.drawImage(canvas, bx + 40, by + 40, box - 80, box - 80)
+    g.fillStyle = '#22103a'; g.textAlign = 'center'; g.font = '800 54px "Baloo 2", sans-serif'
+    g.fillText(`Código ${poll.code}`, bx + box / 2, by + box + 50)
+    g.fillStyle = '#6b5785'; g.font = '700 30px Nunito, sans-serif'
+    g.fillText(voteUrl(poll.code).replace(/^https?:\/\//, ''), bx + box / 2, by + box + 92)
+    const a = document.createElement('a'); a.href = out.toDataURL('image/png')
+    a.download = `quizuu-${poll.code}-${n ? `pergunta-${n}` : 'slide'}.png`; a.click()
   }
 
   function downloadQr() {
@@ -181,20 +212,65 @@ export default function VotacaoEditor() {
               </section>
 
               <section className="card present-embed">
-                <h3>Módulo para o PowerPoint</h3>
-                <CopyField label="Tela do resultado (segue a pergunta ao vivo)" value={screenUrl(poll.code, poll.host_key)}
-                  hint="Use em um slide só. Você avança pelas setas do teclado na própria tela ou pelo botão Próxima aqui." />
-                <details className="per-slide">
-                  <summary>Um link por pergunta (um slide para cada)</summary>
-                  <p className="muted" style={{ fontSize: 14, margin: '8px 0' }}>Quando o slide aparece, a votação muda sozinha para aquela pergunta.</p>
-                  {qs.map((q, i) => <CopyField key={q.id} label={`Pergunta ${i + 1}: ${q.prompt || 'sem enunciado'}`} value={screenUrl(poll.code, poll.host_key, i + 1)} />)}
-                </details>
-                <ol className="howto">
-                  <li>No PowerPoint, vá em <strong>Inserir → Suplementos → Obter suplementos</strong> e instale o <strong>Web Viewer</strong>.</li>
-                  <li>No slide, insira o Web Viewer e cole o link da tela.</li>
-                  <li>Durante a apresentação o resultado atualiza sozinho.</li>
-                </ol>
-                <p className="muted" style={{ fontSize: 13, margin: 0 }}>Esses links trazem a chave do apresentador. Não compartilhe com a plateia; para ela, use o link de votação.</p>
+                <h3>Colocar na apresentação</h3>
+                <div className="seg seg--sm" role="tablist" aria-label="Programa de apresentação">
+                  <button role="tab" aria-selected={plat === 'ppt'} className={plat === 'ppt' ? 'on' : ''} onClick={() => setPlat('ppt')}>PowerPoint</button>
+                  <button role="tab" aria-selected={plat === 'canva'} className={plat === 'canva' ? 'on' : ''} onClick={() => setPlat('canva')}>Canva</button>
+                  <button role="tab" aria-selected={plat === 'keynote'} className={plat === 'keynote' ? 'on' : ''} onClick={() => setPlat('keynote')}>Keynote</button>
+                </div>
+
+                {plat === 'ppt' && <>
+                  <CopyField label="Tela do resultado (segue a pergunta ao vivo)" value={screenUrl(poll.code, poll.host_key)}
+                    hint="Use em um slide só. Você avança pelas setas do teclado na própria tela ou pelo botão Próxima aqui." />
+                  <details className="per-slide">
+                    <summary>Um link por pergunta (um slide para cada)</summary>
+                    <p className="muted" style={{ fontSize: 14, margin: '8px 0' }}>Quando o slide aparece, a votação muda sozinha para aquela pergunta.</p>
+                    {qs.map((q, i) => <CopyField key={q.id} label={`Pergunta ${i + 1}: ${q.prompt || 'sem enunciado'}`} value={screenUrl(poll.code, poll.host_key, i + 1)} />)}
+                  </details>
+                  <ol className="howto">
+                    <li>No PowerPoint, vá em <strong>Inserir → Suplementos → Obter suplementos</strong> e instale o <strong>Web Viewer</strong>.</li>
+                    <li>No slide, insira o Web Viewer e cole o link da tela.</li>
+                    <li>Durante a apresentação o resultado atualiza sozinho.</li>
+                  </ol>
+                </>}
+
+                {plat === 'canva' && <>
+                  <CopyField label="Link para incorporar no Canva" value={embedUrl(poll.code, poll.host_key)}
+                    hint="Mostra o resultado ao vivo e segue a pergunta que você abrir aqui." />
+                  <details className="per-slide">
+                    <summary>Um link por pergunta (uma página do Canva para cada)</summary>
+                    {qs.map((q, i) => <CopyField key={q.id} label={`Pergunta ${i + 1}: ${q.prompt || 'sem enunciado'}`} value={embedUrl(poll.code, poll.host_key, i + 1)} />)}
+                  </details>
+                  <ol className="howto">
+                    <li>Copie o link acima e cole direto na página do Canva (Ctrl+V ou Cmd+V). O Canva transforma o link em um quadro incorporado.</li>
+                    <li>Se ele virar só texto, use <strong>Apps → Incorporar</strong> (Embed), cole o link e clique em <strong>Adicionar ao design</strong>.</li>
+                    <li>Ajuste o quadro para ocupar a página. No modo <strong>Apresentar</strong>, o resultado atualiza sozinho.</li>
+                  </ol>
+                  <button className="qz-btn qz-btn--secondary" onClick={() => downloadSlide()}>Baixar slide com QR code (PNG)</button>
+                  <p className="muted" style={{ fontSize: 13, margin: 0 }}>O quadro incorporado depende da conexão no momento da apresentação. Coloque antes um slide com o QR code para a plateia entrar.</p>
+                </>}
+
+                {plat === 'keynote' && <>
+                  <p className="muted" style={{ margin: 0, fontSize: 14 }}>O Keynote não exibe páginas da web dentro do slide. O caminho é ter um slide com o QR code e a tela do resultado aberta no navegador para alternar na hora.</p>
+                  <div className="btn-row">
+                    <button className="qz-btn qz-btn--primary" onClick={() => downloadSlide()}>Baixar slide geral (PNG)</button>
+                  </div>
+                  <details className="per-slide">
+                    <summary>Um slide por pergunta</summary>
+                    <div className="slide-list">
+                      {qs.map((q, i) => <button key={q.id} className="qz-btn qz-btn--ghost" onClick={() => downloadSlide(i + 1)}>Baixar pergunta {i + 1}: {q.prompt.slice(0, 40) || 'sem enunciado'}</button>)}
+                    </div>
+                  </details>
+                  <CopyField label="Tela do resultado" value={screenUrl(poll.code, poll.host_key)} />
+                  <ol className="howto">
+                    <li>Arraste o PNG baixado para um slide do Keynote. Ele já vem no tamanho 1920×1080.</li>
+                    <li>Selecione a imagem, vá em <strong>Formatar → Adicionar link → Página da web</strong> e cole o link da tela do resultado. Na apresentação, um clique no slide abre o resultado ao vivo.</li>
+                    <li>Outra opção: abra a tela do resultado no navegador em tela cheia antes de começar e use <strong>Cmd+Tab</strong> para alternar entre o Keynote e o resultado.</li>
+                    <li>No navegador, as setas do teclado avançam as perguntas e o resultado atualiza sozinho.</li>
+                  </ol>
+                </>}
+
+                <p className="muted" style={{ fontSize: 13, margin: 0 }}>Os links de tela trazem a chave do apresentador. Não compartilhe com a plateia; para ela, use o link de votação.</p>
               </section>
             </div>
 

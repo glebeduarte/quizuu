@@ -1,1 +1,9 @@
-{"rewrites":[{"source":"/(.*)","destination":"/index.html"}]}
+{
+  "rewrites": [
+    { "source": "/embed/:code", "destination": "/api/embed?code=:code" },
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
+  ],
+  "headers": [
+    { "source": "/v/(.*)", "headers": [{ "key": "Content-Security-Policy", "value": "frame-ancestors *" }] }
+  ]
+}

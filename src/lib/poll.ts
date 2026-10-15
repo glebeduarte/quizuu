@@ -33,3 +33,6 @@ export function randomCode() {
 export const voteUrl = (code: string) => `${window.location.origin}/v/${code}`
 export const screenUrl = (code: string, key: string, position?: number) =>
   `${window.location.origin}/v/${code}/tela?k=${key}${position ? `&p=${position}` : ''}`
+
+export const embedUrl = (code: string, key: string, position?: number) =>
+  `${window.location.origin}/embed/${code}?k=${key}${position ? `&p=${position}` : ''}`
