@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/auth'
 import { randomPin } from '../lib/game'
 import { PanelTabs } from './Votacoes'
+import { useIsAdmin } from './Admin'
 
 type Partida = { id: string; created_at: string; status: string; quizzes: { title: string } | null; players: { count: number }[] }
 type Quiz = { id: string; title: string; updated_at: string; questions: { count: number }[] }
@@ -11,6 +12,7 @@ type Quiz = { id: string; title: string; updated_at: string; questions: { count:
 export default function Painel() {
   const { session } = useAuth()
   const navigate = useNavigate()
+  const isAdmin = useIsAdmin()
   const [quizzes, setQuizzes] = useState<Quiz[] | null>(null)
   const [creating, setCreating] = useState(false)
   const [partidas, setPartidas] = useState<Partida[]>([])
@@ -61,6 +63,7 @@ export default function Painel() {
         <Link to="/" className="wordmark"><picture><source srcSet="/logo-wordmark-light.png" media="(prefers-color-scheme: dark)" /><img src="/logo-wordmark.png" alt="Quizuu" /></picture></Link>
         <div className="btn-row" style={{ alignItems: 'center' }}>
           <span className="muted" style={{ fontSize: 14 }}>{session?.user.email}</span>
+          {isAdmin && <Link to="/admin" className="qz-btn qz-btn--secondary" style={{ textDecoration: 'none' }}>Admin</Link>}
           <button className="qz-btn qz-btn--ghost" onClick={() => supabase.auth.signOut()}>Sair</button>
         </div>
       </header>

@@ -519,3 +519,27 @@ input[type=range] { accent-color: var(--brand); width: 100%; height: 52px; }
 @keyframes fadeUpT { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .pr-word, .tela-prompt, .vote-results { animation: none; } .pr-track i { transition: none; } }
 .tela-main .pr-bars { align-content: center; }
+
+/* Admin */
+.admin-sec { display: grid; gap: var(--space-3); }
+.admin-sec h2 { font-size: 22px; margin: 0; }
+.admin-uso { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: var(--space-4); }
+.admin-bloco h3 { margin: 0 0 var(--space-3); font-size: 18px; }
+.admin-bloco dl { margin: 0; display: grid; gap: 8px; }
+.admin-bloco dl div { display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); padding-bottom: 6px; }
+.admin-bloco dt { color: var(--ink-muted); }
+.admin-bloco dd { margin: 0; font-weight: 800; font-variant-numeric: tabular-nums; }
+.admin-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.admin-chips button { border: 2px solid var(--line); background: transparent; color: inherit; border-radius: 999px; padding: 8px 14px; font: 700 14px var(--font-body); cursor: pointer; min-height: 40px; }
+.admin-chips button.on { border-color: var(--brand, #e8620c); background: color-mix(in srgb, #e8620c 12%, transparent); }
+.admin-chart { display: flex; align-items: flex-end; gap: 3px; height: 180px; }
+.admin-col { flex: 1; height: 100%; display: flex; align-items: flex-end; }
+.admin-col div { width: 100%; min-height: 2px; border-radius: 4px 4px 0 0; }
+.admin-eixo { display: flex; justify-content: space-between; font-size: 13px; }
+.admin-tabela { width: 100%; border-collapse: collapse; font-size: 14px; }
+.admin-tabela th, .admin-tabela td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.admin-tabela th { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-muted); }
+.admin-tag { margin-left: 8px; background: #7a2fe0; color: #fff; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 999px; }
+.admin-acoes td { background: color-mix(in srgb, #7a2fe0 6%, transparent); white-space: normal; }
+.admin-acoes__in { display: grid; gap: 12px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
