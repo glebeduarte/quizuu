@@ -9,6 +9,7 @@ import Painel from './pages/Painel'
 import Jogar from './pages/Jogar'
 import Host from './pages/Host'
 import Editor from './pages/Editor'
+import Relatorio from './pages/Relatorio'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -21,6 +22,7 @@ createRoot(document.getElementById('root')!).render(
           <Route path="/jogar" element={<Jogar />} />
           <Route path="/painel" element={<RequireAuth><Painel /></RequireAuth>} />
           <Route path="/quiz/:id" element={<RequireAuth><Editor /></RequireAuth>} />
+          <Route path="/relatorio/:sessionId" element={<RequireAuth><Relatorio /></RequireAuth>} />
           <Route path="/host/:sessionId" element={<RequireAuth><Host /></RequireAuth>} />
           <Route path="*" element={<Home />} />
         </Routes>

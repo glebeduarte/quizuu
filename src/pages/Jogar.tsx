@@ -12,6 +12,7 @@ const JOIN_ERRORS: Record<string, string> = {
   partida_em_andamento: 'Essa partida já começou. Peça um novo PIN ao organizador.',
   apelido_em_uso: 'Esse apelido já está na sala. Escolha outro.',
   apelido_invalido: 'O apelido precisa ter de 1 a 20 caracteres.',
+  apelido_ofensivo: 'Esse apelido não é permitido. Escolha outro.',
 }
 
 export default function Jogar() {

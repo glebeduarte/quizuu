@@ -39,15 +39,30 @@ export default function Host() {
   useEffect(() => {
     (async () => {
       const { data, error } = await supabase.from('sessions')
-        .select('pin, status, quizzes(title, questions(id,prompt,kind,time_limit_s,points_multiplier,position, options(id,label,is_correct,position)))')
+        .select('pin, status, current_question_id, question_started_at, quizzes(title, questions(id,prompt,kind,time_limit_s,points_multiplier,position, options(id,label,is_correct,position)))')
         .eq('id', sessionId!).single()
       if (error || !data) { setError('Sala não encontrada.'); return }
       type Q = { title: string; questions: Question[] }
       const quiz = data.quizzes as unknown as Q
       setPin(data.pin); setTitle(quiz.title)
-      setQuestions(quiz.questions.filter((q) => q.options.length >= 2).sort((a, b) => a.position - b.position)
-        .map((q) => ({ ...q, options: [...q.options].sort((a, b) => a.position - b.position) })))
-      loadPlayers()
+      const qs = quiz.questions.filter((q) => q.options.length >= 2).sort((a, b) => a.position - b.position)
+        .map((q) => ({ ...q, options: [...q.options].sort((a, b) => a.position - b.position) }))
+      setQuestions(qs)
+      await loadPlayers()
+      // telão recarregado no meio da partida: retoma de onde parou
+      const i = qs.findIndex((q) => q.id === data.current_question_id)
+      if (data.status === 'finished') setState({ phase: 'podium' })
+      else if (i >= 0) {
+        const q = qs[i], base = { qIndex: i, total: qs.length, optionIds: q.options.map((o) => o.id) }
+        if (data.status === 'question') {
+          endsAt.current = new Date(data.question_started_at).getTime() + q.time_limit_s * 1000
+          setState({ phase: 'question', ...base, timeLimit: q.time_limit_s, kind: q.kind })
+        } else if (data.status === 'reveal') {
+          const { data: ans } = await supabase.from('answers').select('option_id').eq('session_id', sessionId!).eq('question_id', q.id)
+          revealedFor.current = i
+          setState({ phase: 'reveal', ...base, correctIndex: q.options.findIndex((o) => o.is_correct), counts: q.options.map((o) => (ans ?? []).filter((a) => a.option_id === o.id).length) })
+        } else if (data.status === 'leaderboard') setState({ phase: 'leaderboard', qIndex: i, total: qs.length })
+      }
     })()
     const ch = channelFor(sessionId!)
     ch.on('broadcast', { event: 'joined' }, () => loadPlayers())
@@ -226,7 +241,10 @@ export default function Host() {
               </div>
             ))}
           </div>
-          <div className="stage-actions"><Link to="/painel" className="qz-btn qz-btn--stage" style={{ textDecoration: 'none' }}>Voltar ao painel</Link></div>
+          <div className="stage-actions" style={{ gap: 12 }}>
+            <Link to={`/relatorio/${sessionId}`} className="qz-btn qz-btn--stage" style={{ textDecoration: 'none' }}>Ver relatório</Link>
+            <Link to="/painel" className="qz-btn qz-btn--ghost" style={{ textDecoration: 'none', color: 'var(--on-color)' }}>Voltar ao painel</Link>
+          </div>
         </main>
       )}
     </div>

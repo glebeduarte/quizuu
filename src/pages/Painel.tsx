@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/auth'
 import { randomPin } from '../lib/game'
 
+type Partida = { id: string; created_at: string; status: string; quizzes: { title: string } | null; players: { count: number }[] }
 type Quiz = { id: string; title: string; updated_at: string; questions: { count: number }[] }
 
 export default function Painel() {
@@ -11,11 +12,14 @@ export default function Painel() {
   const navigate = useNavigate()
   const [quizzes, setQuizzes] = useState<Quiz[] | null>(null)
   const [creating, setCreating] = useState(false)
+  const [partidas, setPartidas] = useState<Partida[]>([])
   const [error, setError] = useState('')
 
   useEffect(() => {
     supabase.from('quizzes').select('id,title,updated_at,questions(count)').order('updated_at', { ascending: false })
       .then(({ data }) => setQuizzes((data as Quiz[]) ?? []))
+    supabase.from('sessions').select('id,created_at,status,quizzes(title),players(count)').order('created_at', { ascending: false }).limit(10)
+      .then(({ data }) => setPartidas(((data ?? []) as unknown as Partida[]).filter((p) => p.status !== 'lobby' || (p.players[0]?.count ?? 0) > 0)))
   }, [])
 
   async function novo() {
@@ -76,6 +80,21 @@ export default function Painel() {
               </div>
             ))}
           </div>
+        )}
+        {partidas.length > 0 && (
+          <section style={{ display: 'grid', gap: 'var(--space-3)', marginTop: 'var(--space-6)' }}>
+            <h2 style={{ fontSize: 24 }}>Partidas recentes</h2>
+            <div className="card" style={{ padding: 0 }}>
+              {partidas.map((p) => (
+                <div key={p.id} className="match-row">
+                  <div><strong>{p.quizzes?.title}</strong><span className="muted"> · {new Date(p.created_at).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })} · {p.players[0]?.count ?? 0} jogadores</span></div>
+                  {p.status === 'finished'
+                    ? <Link to={`/relatorio/${p.id}`}>Relatório</Link>
+                    : <Link to={`/host/${p.id}`}>Retomar</Link>}
+                </div>
+              ))}
+            </div>
+          </section>
         )}
       </main>
     </div>

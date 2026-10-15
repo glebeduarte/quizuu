@@ -79,8 +79,8 @@ h1{font:800 clamp(30px,6vw,44px)/1.05 var(--display);margin:8px 0 10px;text-wrap
 </div>
 
 <script type="application/json" id="state">
-{"updated":"14/10/2026, 23:05",
-"next":{"you":"Fazer uma partida de teste com 2 ou 3 celulares e me contar o que sentiu.","me":"Ajustar o que aparecer no teste e fazer o relatório da partida."},
+{"updated":"14/10/2026, 23:40",
+"next":{"you":"Fazer uma partida de teste com 2 ou 3 celulares e me contar o que sentiu.","me":"Geração de quiz por IA (Fase 8)."},
 "phases":[
 {"title":"Decisões e fundação","desc":"Fechar os pontos abertos e preparar o ambiente onde tudo vai rodar.","note":"Repositório criado e organizado com especificação e esquema do banco. Projeto Supabase Quizuu conectado (São Paulo).","ready":"ambiente pronto e decisões de produto tomadas.","tasks":[
  {"t":"Criar repositório no GitHub (glebeduarte/quizuu)","s":"done"},
@@ -94,7 +94,7 @@ h1{font:800 clamp(30px,6vw,44px)/1.05 var(--display);margin:8px 0 10px;text-wrap
  {"t":"Aplicar o esquema no Supabase","s":"done"},
  {"t":"Ativar regras de acesso (RLS) e conferir alertas","s":"done"},
  {"t":"Criar área de arquivos para imagens (adiado por decisão)","s":"done"}]},
-{"title":"Esqueleto do app e login","desc":"Projeto React publicado, com login do organizador e as três telas base.","note":"No ar em quizuu-beryl.vercel.app, com cadastro direto testado.","ready":"organizador entra com e-mail e vê o painel vazio.","tasks":[
+{"title":"Esqueleto do app e login","desc":"Projeto React publicado, com home, login do organizador e as três telas base.","note":"No ar em quizuu-beryl.vercel.app, com cadastro direto testado.","ready":"organizador entra com e-mail e vê o painel vazio.","tasks":[
  {"t":"Criar o projeto React no repositório, com as cores e fontes do design system","s":"done"},
  {"t":"Login do organizador com e-mail e senha, sem verificação","s":"done"},
  {"t":"Rotas: início, painel, tela do host, tela do jogador","s":"done"},
@@ -106,7 +106,7 @@ h1{font:800 clamp(30px,6vw,44px)/1.05 var(--display);margin:8px 0 10px;text-wrap
  {"t":"Reordenar, duplicar e excluir perguntas","s":"done"}]},
 {"title":"Sala ao vivo","desc":"PIN, QR code e lobby mostrando quem entrou em tempo real.","ready":"20 celulares entram na mesma sala e aparecem no telão.","tasks":[
  {"t":"Gerar sala com PIN de 6 dígitos e QR code","s":"done"},
- {"t":"Entrada do jogador por PIN + apelido (filtro de palavrões ainda falta)","s":"doing"},
+ {"t":"Entrada do jogador por PIN + apelido, com filtro de palavrões","s":"done"},
  {"t":"Lobby com presença em tempo real e botão de remover","s":"done"},
  {"t":"Reconexão automática do jogador","s":"done"}]},
 {"title":"Partida e pontuação","desc":"O coração do sistema: tempo medido no servidor e pontos por velocidade.","note":"Testado com host e dois jogadores reais: tempos de 0,6 s e 2,6 s viraram 985 e 935 pontos. Resposta dupla, token falso e espiar a resposta certa foram bloqueados.","ready":"partida inteira jogada com ranking correto.","tasks":[
@@ -118,8 +118,8 @@ h1{font:800 clamp(30px,6vw,44px)/1.05 var(--display);margin:8px 0 10px;text-wrap
 {"title":"Ranking, pódio e relatórios","desc":"Momento de festa no fim e dados para o organizador depois.","ready":"pódio animado e relatório exportável.","tasks":[
  {"t":"Ranking parcial no telão e posição no celular","s":"done"},
  {"t":"Pódio final com top 3","s":"done"},
- {"t":"Relatório da partida (acertos por pergunta, tempo médio)","s":"todo"},
- {"t":"Exportar resultados em planilha","s":"todo"}]},
+ {"t":"Relatório da partida (acertos por pergunta, tempo médio)","s":"done"},
+ {"t":"Exportar resultados em planilha","s":"done"}]},
 {"title":"Perguntas geradas por IA","desc":"Criar um quiz inteiro a partir de um tema ou de um texto colado.","ready":"quiz de 10 perguntas gerado e editável em segundos.","tasks":[
  {"t":"Função que chama o Claude com tema, nível e quantidade","s":"todo"},
  {"t":"Gerar a partir de texto ou PDF colado","s":"todo"},
