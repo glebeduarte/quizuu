@@ -1,0 +1,15 @@
+{
+  "name": "Quizuu",
+  "short_name": "Quizuu",
+  "description": "Quiz e votações ao vivo para aulas, cursos, palestras e eventos.",
+  "lang": "pt-BR",
+  "start_url": "/painel",
+  "display": "standalone",
+  "background_color": "#fff6ee",
+  "theme_color": "#3d1278",
+  "icons": [
+    { "src": "/android-chrome-192x192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/android-chrome-512x512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/maskable-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
