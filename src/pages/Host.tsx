@@ -5,7 +5,7 @@ import { supabase } from '../lib/supabase'
 import { ANSWER, Shape } from '../lib/shapes'
 import { channelFor, formatPin, formatPoints, type GameState } from '../lib/game'
 import type { RealtimeChannel } from '@supabase/supabase-js'
-import { sfx, stopMusic, unlock } from '../lib/sound'
+import { preloadLobby, sfx, stopMusic, unlock } from '../lib/sound'
 import SoundToggle from '../lib/SoundToggle'
 
 type Option = { id: string; label: string; is_correct: boolean; position: number }
@@ -41,7 +41,7 @@ export default function Host() {
     else if (p === 'leaderboard') sfx.drumroll(1.2)
     else if (p === 'podium') sfx.fanfare()
   }, [phaseKey, soundOn])
-  useEffect(() => () => stopMusic(), [])
+  useEffect(() => { preloadLobby(); return () => stopMusic() }, [])
 
   // um "pop" para cada jogador que entra
   useEffect(() => {

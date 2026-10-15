@@ -14,6 +14,34 @@ let nextTime = 0
 let step = 0
 const listeners = new Set<(m: boolean) => void>()
 
+// Música de espera do lobby: arquivo próprio, em loop, passando pelo volume geral
+let lobbyEl: HTMLAudioElement | null = null
+let lobbyGain: GainNode | null = null
+let lobbyStop = 0
+export function preloadLobby() {
+  if (lobbyEl) return
+  lobbyEl = new Audio('/audio/lobby.mp3')
+  lobbyEl.loop = true; lobbyEl.preload = 'auto'; lobbyEl.crossOrigin = 'anonymous'
+}
+function lobbyStart() {
+  const c = ac(); if (!c || !master) return
+  preloadLobby()
+  if (!lobbyGain) {
+    lobbyGain = c.createGain(); lobbyGain.gain.value = 0
+    c.createMediaElementSource(lobbyEl!).connect(lobbyGain).connect(master)
+  }
+  window.clearTimeout(lobbyStop)
+  lobbyGain.gain.cancelScheduledValues(c.currentTime)
+  lobbyGain.gain.setTargetAtTime(0.8, c.currentTime, 0.4)
+  lobbyEl!.play().catch(() => {})
+}
+function lobbyFade(fade: number) {
+  if (!lobbyEl || !lobbyGain || !ctx || lobbyEl.paused) return
+  lobbyGain.gain.setTargetAtTime(0.0001, ctx.currentTime, Math.max(fade, 0.05) / 3)
+  window.clearTimeout(lobbyStop)
+  lobbyStop = window.setTimeout(() => lobbyEl?.pause(), fade * 1000 + 400)
+}
+
 function ac() {
   if (!ctx) {
     const C = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
@@ -113,6 +141,7 @@ function startLoop(kind: Exclude<Loop, null>) {
 }
 
 export function stopMusic(fade = 0.25) {
+  lobbyFade(fade)
   window.clearInterval(timer); timer = 0
   if (current && ctx && musicBus) {
     musicBus.gain.setTargetAtTime(0.0001, ctx.currentTime, fade / 3)
@@ -127,7 +156,7 @@ export function stopMusic(fade = 0.25) {
 const now = () => (ac()?.currentTime ?? 0) + 0.01
 
 export const sfx = {
-  lobby: () => startLoop('lobby'),
+  lobby: () => { stopMusic(0.1); lobbyStart() },
   questionMusic: () => startLoop('question'),
   join() { const t = now(); tone(79, t, 0.09, { type: 'sine', vol: 0.18, slide: 7 }); tone(86, t + 0.06, 0.12, { type: 'sine', vol: 0.12 }) },
   questionStart() {
