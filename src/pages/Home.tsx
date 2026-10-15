@@ -149,7 +149,7 @@ export default function Home() {
     <div className="home">
       <header className={`home-header${scrolled ? ' scrolled' : ''}`}>
         <div className="home-header-in">
-          <Link to="/" className="wordmark"><picture><source srcSet="/logo-wordmark-light.png" media="(prefers-color-scheme: dark)" /><img src="/logo-wordmark.png" alt="Quizuu" /></picture></Link>
+          <Link to="/" className="wordmark"><img src="/logo-wordmark.png" alt="Quizuu" /></Link>
           <nav className="home-nav">
             <a href="#como-funciona" className="nav-link">Como funciona</a>
             <Link to="/jogar" className="nav-link">Tenho um PIN</Link>
