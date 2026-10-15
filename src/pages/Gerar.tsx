@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/auth'
@@ -9,7 +9,8 @@ type Gerada = { enunciado: string; tipo: 'multiple_choice' | 'true_false'; opcoe
 
 const ERROS: Record<string, string> = {
   ia_nao_configurada: 'A geração por IA ainda não foi ativada. Falta cadastrar a chave do Gemini no Supabase.',
-  limite_diario: 'Você chegou ao limite de 20 gerações nas últimas 24 horas. Tente de novo amanhã.',
+  ia_bloqueada: 'A geração com IA não está liberada para a sua conta.',
+  limite_mensal: 'Você usou todas as gerações com IA deste mês. O limite renova no dia 1º.',
   sem_conteudo: 'Escreva um tema ou envie um material.',
   tipo_de_arquivo: 'Envie PDF, TXT, MD, PNG, JPG ou WEBP.',
   arquivo_grande: 'O arquivo precisa ter até 30 MB.',
@@ -42,6 +43,8 @@ export default function Gerar() {
   const [fora, setFora] = useState<Set<number>>(new Set())
   const [restantes, setRestantes] = useState<number | null>(null)
   const [salvando, setSalvando] = useState(false)
+  const [acesso, setAcesso] = useState<{ enabled: boolean; limit: number; used: number } | null>(null)
+  useEffect(() => { supabase.rpc('my_ai_access').then(({ data }) => setAcesso(data ?? { enabled: false, limit: 0, used: 0 })) }, [])
 
   async function gerar(e: FormEvent) {
     e.preventDefault()
@@ -105,6 +108,15 @@ export default function Gerar() {
           <p className="muted">O Gemini sugere as perguntas. Você revisa, tira o que não serve e ajusta tudo no editor antes de jogar.</p>
         </div>
 
+        {acesso === null ? <p className="muted">Carregando…</p> : !acesso.enabled ? (
+          <div className="card gen-lock">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></svg>
+            <h2>Recurso do plano pago</h2>
+            <p className="muted">A geração de quizzes com IA ainda não está liberada para a sua conta. Você continua criando quizzes à mão e jogando de graça, sem limite.</p>
+            <a className="qz-btn qz-btn--primary" href="mailto:glebejr@gmail.com?subject=Quero%20liberar%20a%20IA%20no%20Quizuu" style={{ textDecoration: 'none' }}>Quero liberar a IA</a>
+          </div>
+        ) : <>
+        <p className="muted" style={{ margin: 0 }}>Gerações usadas este mês: {acesso.used} de {acesso.limit}.</p>
         <form className="card gen-form" onSubmit={gerar}>
           <div className="seg" role="tablist" aria-label="Origem das perguntas">
             <button type="button" role="tab" aria-selected={modo === 'tema'} className={modo === 'tema' ? 'on' : ''} onClick={() => setModo('tema')}>Por tema</button>
@@ -191,7 +203,7 @@ export default function Gerar() {
                 {salvando ? 'Criando…' : `Criar quiz com ${perguntas.length - fora.size} perguntas`}
               </button>
             </div>
-            <p className="muted" style={{ margin: 0 }}>Toque numa pergunta para deixá-la de fora. Depois você ainda pode editar tudo.{restantes !== null && ` Gerações restantes hoje: ${restantes}.`}</p>
+            <p className="muted" style={{ margin: 0 }}>Toque numa pergunta para deixá-la de fora. Depois você ainda pode editar tudo.{restantes !== null && ` Gerações restantes este mês: ${restantes}.`}</p>
             <ol className="gen-list">
               {perguntas.map((p, i) => (
                 <li key={i} className={`gen-q${fora.has(i) ? ' off' : ''}`} style={{ animationDelay: `${i * 60}ms` }}>
@@ -215,6 +227,7 @@ export default function Gerar() {
             </ol>
           </section>
         )}
+        </>}
       </main>
     </div>
   )

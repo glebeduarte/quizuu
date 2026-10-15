@@ -543,3 +543,13 @@ input[type=range] { accent-color: var(--brand); width: 100%; height: 52px; }
 .admin-acoes td { background: color-mix(in srgb, #7a2fe0 6%, transparent); white-space: normal; }
 .admin-acoes__in { display: grid; gap: 12px; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.gen-lock { display: grid; justify-items: center; text-align: center; gap: var(--space-3); padding: var(--space-8) var(--space-6); }
+.gen-lock svg { width: 48px; height: 48px; fill: none; stroke: #7a2fe0; stroke-width: 2; stroke-linecap: round; }
+.gen-lock h2 { margin: 0; font-size: 24px; }
+.gen-lock p { margin: 0; max-width: 46ch; }
+.ia-barra { height: 12px; border-radius: 999px; background: var(--line); overflow: hidden; }
+.ia-barra div { height: 100%; border-radius: 999px; }
+.ia-form { display: grid; gap: 10px; }
+.ia-form label { display: grid; gap: 4px; font-size: 14px; color: var(--ink-muted); }
+.ia-lim { width: 90px; min-height: 40px; }
+.ia-on { color: #1d7a3a; font-weight: 800; }

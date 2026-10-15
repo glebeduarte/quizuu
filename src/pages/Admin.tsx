@@ -2,6 +2,7 @@ import { Fragment, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/auth'
+import AdminIA from './AdminIA'
 
 type Totais = Record<string, number>
 type Dia = { dia: string; cadastros: number; partidas: number; jogadores: number; votos: number; ia: number }
@@ -160,6 +161,7 @@ export default function Admin() {
               </div>
             </div>
           </section>
+          <AdminIA />
           <section className="admin-sec">
             <h2>Últimos 30 dias</h2>
             <div className="card" style={{ display: 'grid', gap: 16 }}>

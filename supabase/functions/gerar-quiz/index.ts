@@ -2,7 +2,6 @@
 // Segredos necessários no Supabase: GEMINI_API_KEY. Opcional: GEMINI_MODEL.
 import { createClient } from 'npm:@supabase/supabase-js@2.45.4'
 
-const DAILY_LIMIT = 20
 const MAX_FILE_BYTES = 30 * 1024 * 1024
 const GEMINI = 'https://generativelanguage.googleapis.com'
 const FILE_TYPES = ['application/pdf', 'text/plain', 'text/markdown', 'image/png', 'image/jpeg', 'image/webp']
@@ -54,10 +53,10 @@ Deno.serve(async (req) => {
   const key = Deno.env.get('GEMINI_API_KEY')
   if (!key) return reply(503, { erro: 'ia_nao_configurada' })
 
-  const since = new Date(Date.now() - 24 * 3600 * 1000).toISOString()
-  const { count } = await supabase.from('ai_generations').select('id', { count: 'exact', head: true })
-    .eq('user_id', user.id).gte('created_at', since)
-  if ((count ?? 0) >= DAILY_LIMIT) return reply(429, { erro: 'limite_diario' })
+  // Acesso à IA é liberado por conta (admin ou plano pago), com limite mensal
+  const { data: acesso } = await supabase.rpc('my_ai_access')
+  if (!acesso?.enabled) return reply(403, { erro: 'ia_bloqueada' })
+  if (acesso.used >= acesso.limit) return reply(429, { erro: 'limite_mensal' })
 
   let input: Input
   try { input = await req.json() } catch { return reply(400, { erro: 'entrada_invalida' }) }
@@ -136,12 +135,13 @@ Deno.serve(async (req) => {
     generationConfig: { responseMimeType: 'application/json', responseSchema: schema, temperature: 0.7 },
   })
   let res: Response | null = null
+  let usedModel = models[0]
   outer: for (const model of models) {
     for (let attempt = 0; attempt < 2; attempt++) {
       res = await fetch(`${GEMINI}/v1beta/models/${model}:generateContent`, {
         method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key }, body: payload,
       })
-      if (res.ok) break outer
+      if (res.ok) { usedModel = model; break outer }
       const busy = res.status === 429 || res.status >= 500
       console.error('gemini', model, res.status, (await res.text()).slice(0, 300))
       if (!busy) break outer
@@ -164,6 +164,11 @@ Deno.serve(async (req) => {
   }).filter((p) => p.enunciado && p.opcoes.length >= 2 && p.opcoes.every(Boolean) && p.correta >= 0 && p.correta < p.opcoes.length)
 
   if (!perguntas.length) return reply(502, { erro: 'resposta_invalida' })
-  await supabase.from('ai_generations').insert({ user_id: user.id, source: material || arquivo ? 'material' : 'tema', questions: perguntas.length })
-  return reply(200, { titulo: String(quiz.titulo ?? tema ?? 'Quiz').slice(0, 120), perguntas, restantes: DAILY_LIMIT - (count ?? 0) - 1 })
+  const uso = out?.usageMetadata ?? {}
+  await supabase.from('ai_generations').insert({
+    user_id: user.id, source: material || arquivo ? 'material' : 'tema', questions: perguntas.length,
+    model: usedModel, tokens_in: Number(uso.promptTokenCount ?? 0),
+    tokens_out: Number(uso.candidatesTokenCount ?? 0) + Number(uso.thoughtsTokenCount ?? 0),
+  })
+  return reply(200, { titulo: String(quiz.titulo ?? tema ?? 'Quiz').slice(0, 120), perguntas, restantes: acesso.limit - acesso.used - 1 })
 })
