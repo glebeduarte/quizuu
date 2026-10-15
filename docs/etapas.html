@@ -79,8 +79,8 @@ h1{font:800 clamp(30px,6vw,44px)/1.05 var(--display);margin:8px 0 10px;text-wrap
 </div>
 
 <script type="application/json" id="state">
-{"updated":"14/10/2026, 22:20",
-"next":{"you":"Rodar o SQL do editor no Supabase (aprovando o pedido ou colando no SQL Editor).","me":"Testar o editor de ponta a ponta e começar a sala ao vivo (Fase 5)."},
+{"updated":"14/10/2026, 22:35",
+"next":{"you":"Testar o editor no celular e rodar supabase/migrations/20261015000001_editor.sql para liberar imagens.","me":"Testar o editor de ponta a ponta e começar a sala ao vivo (Fase 5)."},
 "phases":[
 {"title":"Decisões e fundação","desc":"Fechar os pontos abertos e preparar o ambiente onde tudo vai rodar.","note":"Repositório criado e organizado com especificação e esquema do banco. Projeto Supabase Quizuu conectado (São Paulo).","ready":"ambiente pronto e decisões de produto tomadas.","tasks":[
  {"t":"Criar repositório no GitHub (glebeduarte/quizuu)","s":"done"},
@@ -94,16 +94,16 @@ h1{font:800 clamp(30px,6vw,44px)/1.05 var(--display);margin:8px 0 10px;text-wrap
  {"t":"Aplicar o esquema no Supabase","s":"done"},
  {"t":"Ativar regras de acesso (RLS) e conferir alertas","s":"done"},
  {"t":"Criar área de arquivos para imagens das perguntas","s":"doing"}]},
-{"title":"Esqueleto do app e login","desc":"Projeto React publicado, com login do organizador e as três telas base.","note":"No ar em quizuu-beryl.vercel.app. O cadastro direto, sem e-mail de verificação, depende do SQL pendente.","ready":"organizador entra com e-mail e vê o painel vazio.","tasks":[
+{"title":"Esqueleto do app e login","desc":"Projeto React publicado, com login do organizador e as três telas base.","note":"No ar em quizuu-beryl.vercel.app, com cadastro direto testado.","ready":"organizador entra com e-mail e vê o painel vazio.","tasks":[
  {"t":"Criar o projeto React no repositório, com as cores e fontes do design system","s":"done"},
- {"t":"Login do organizador com e-mail e senha, sem verificação","s":"doing"},
+ {"t":"Login do organizador com e-mail e senha, sem verificação","s":"done"},
  {"t":"Rotas: início, painel, tela do host, tela do jogador","s":"done"},
  {"t":"Publicar na Vercel (quizuu-beryl.vercel.app)","s":"done"}]},
-{"title":"Criador de quiz","desc":"Montar, editar e organizar quizzes de múltipla escolha.","note":"Telas prontas e publicadas. Para salvar perguntas e imagens falta rodar o SQL supabase/migrations/20261015000001_editor_e_login.sql.","ready":"um quiz completo criado e salvo pelo painel.","tasks":[
+{"title":"Criador de quiz","desc":"Montar, editar e organizar quizzes de múltipla escolha.","note":"Editor salvando e testado contra o banco. Só as imagens dependem do SQL pendente.","ready":"um quiz completo criado e salvo pelo painel.","tasks":[
  {"t":"Lista de quizzes do organizador","s":"done"},
- {"t":"Editor de perguntas (texto, 2 a 4 opções, correta, tempo, pontos, verdadeiro ou falso)","s":"doing"},
+ {"t":"Editor de perguntas (texto, 2 a 4 opções, correta, tempo, pontos, verdadeiro ou falso)","s":"done"},
  {"t":"Upload de imagem por pergunta","s":"doing"},
- {"t":"Reordenar, duplicar e excluir perguntas","s":"doing"}]},
+ {"t":"Reordenar, duplicar e excluir perguntas","s":"done"}]},
 {"title":"Sala ao vivo","desc":"PIN, QR code e lobby mostrando quem entrou em tempo real.","ready":"20 celulares entram na mesma sala e aparecem no telão.","tasks":[
  {"t":"Gerar sala com PIN de 6 dígitos e QR code","s":"todo"},
  {"t":"Entrada do jogador por PIN + apelido (filtro de palavrões)","s":"todo"},

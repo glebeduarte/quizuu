@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/auth'
 import { ANSWER, Shape } from '../lib/shapes'
+import { saveQuiz } from '../lib/saveQuiz'
 
 type Option = { id: string; label: string; is_correct: boolean }
 type Kind = 'multiple_choice' | 'true_false'
@@ -94,14 +95,15 @@ export default function Editor() {
     const ext = file.name.split('.').pop()?.toLowerCase() || 'png'
     const path = `${session!.user.id}/${uid()}.${ext}`
     const { error } = await supabase.storage.from('midia').upload(path, file, { contentType: file.type })
-    if (error) { setNotice({ kind: 'err', text: 'Não foi possível enviar a imagem agora.' }); return }
+    if (error) { setNotice({ kind: 'err', text: 'O envio de imagens ainda não está ativo. A pergunta funciona sem imagem.' }); return }
     update({ media_url: supabase.storage.from('midia').getPublicUrl(path).data.publicUrl })
   }
 
   async function save() {
     setSaving(true); setNotice(null)
     const payload = questions.map((x) => ({ ...x, options: x.options.filter((o) => o.label.trim()).map((o) => ({ ...o, label: o.label.trim() })) }))
-    const { error } = await supabase.rpc('save_quiz', { p_quiz_id: id, p_title: title.trim() || 'Quiz sem título', p_questions: payload })
+    let error: unknown = null
+    try { await saveQuiz(id!, title.trim() || 'Quiz sem título', payload) } catch (e) { error = e; console.error(e) }
     setSaving(false)
     if (error) setNotice({ kind: 'err', text: 'Não foi possível salvar. Verifique a conexão e tente de novo.' })
     else { setDirty(false); setNotice({ kind: 'ok', text: 'Quiz salvo.' }) }
