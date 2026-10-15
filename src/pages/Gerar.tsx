@@ -11,7 +11,7 @@ type Gerada = { enunciado: string; tipo: 'multiple_choice' | 'true_false'; opcoe
 const ERROS: Record<string, string> = {
   ia_nao_configurada: 'A geração por IA ainda não foi ativada. Falta cadastrar a chave do Gemini no Supabase.',
   ia_bloqueada: 'A geração com IA não está liberada para a sua conta.',
-  limite_mensal: 'Você usou as gerações com IA deste mês. O limite renova no dia 1º.',
+  limite_mensal: 'Você usou todas as gerações com IA disponíveis. No plano Grátis são 3 no total; assine o Pro para ter 25 por mês.',
   sem_conteudo: 'Escreva um tema ou envie um material.',
   tipo_de_arquivo: 'Envie PDF, TXT, MD, PNG, JPG ou WEBP.',
   arquivo_grande: 'O arquivo precisa ter até 30 MB.',
@@ -44,7 +44,7 @@ export default function Gerar() {
   const [fora, setFora] = useState<Set<number>>(new Set())
   const [restantes, setRestantes] = useState<number | null>(null)
   const [salvando, setSalvando] = useState(false)
-  const [acesso, setAcesso] = useState<{ enabled: boolean; limit: number; used: number } | null>(null)
+  const [acesso, setAcesso] = useState<{ enabled: boolean; limit: number; used: number; periodo?: string; plan?: string } | null>(null)
   useEffect(() => { supabase.rpc('my_ai_access').then(({ data }) => setAcesso(data ?? { enabled: false, limit: 0, used: 0 })) }, [])
 
   async function gerar(e: FormEvent) {
@@ -109,15 +109,17 @@ export default function Gerar() {
           <p className="muted">O Gemini sugere as perguntas. Você revisa, tira o que não serve e ajusta tudo no editor antes de jogar.</p>
         </div>
 
-        {acesso === null ? <p className="muted">Carregando…</p> : !acesso.enabled ? (
+        {acesso === null ? <p className="muted">Carregando…</p> : (!acesso.enabled || (acesso.periodo === 'total' && acesso.used >= acesso.limit)) ? (
           <div className="card gen-lock">
             <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></svg>
-            <h2>Recurso do plano Pro</h2>
+            <h2>{acesso.periodo === 'total' ? 'Você usou as 3 gerações grátis' : 'Recurso do plano Pro'}</h2>
             <p className="muted">Com o Pro você gera até 25 quizzes por mês com IA, a partir de um tema ou de um material seu, e cria até 50 quizzes e 50 votações. No plano Grátis você segue criando quizzes à mão.</p>
             <Link className="qz-btn qz-btn--primary" to="/plano" style={{ textDecoration: 'none' }}>Assinar o Pro por {PRECO}/mês</Link>
           </div>
         ) : <>
-        <p className="muted" style={{ margin: 0 }}>Gerações usadas este mês: {acesso.used} de {acesso.limit}.</p>
+        {acesso.periodo === 'total'
+          ? <p className="notice notice--ok" style={{ margin: 0 }}>No plano Grátis você tem {acesso.limit} gerações com IA para experimentar. Usadas: {acesso.used} de {acesso.limit}. <Link to="/plano">Com o Pro são 25 por mês.</Link></p>
+          : <p className="muted" style={{ margin: 0 }}>Gerações usadas este mês: {acesso.used} de {acesso.limit}.</p>}
         <form className="card gen-form" onSubmit={gerar}>
           <div className="seg" role="tablist" aria-label="Origem das perguntas">
             <button type="button" role="tab" aria-selected={modo === 'tema'} className={modo === 'tema' ? 'on' : ''} onClick={() => setModo('tema')}>Por tema</button>
@@ -204,7 +206,7 @@ export default function Gerar() {
                 {salvando ? 'Criando…' : `Criar quiz com ${perguntas.length - fora.size} perguntas`}
               </button>
             </div>
-            <p className="muted" style={{ margin: 0 }}>Toque numa pergunta para deixá-la de fora. Depois você ainda pode editar tudo.{restantes !== null && ` Gerações restantes este mês: ${restantes}.`}</p>
+            <p className="muted" style={{ margin: 0 }}>Toque numa pergunta para deixá-la de fora. Depois você ainda pode editar tudo.{restantes !== null && ` Gerações restantes: ${restantes}.`}</p>
             <ol className="gen-list">
               {perguntas.map((p, i) => (
                 <li key={i} className={`gen-q${fora.has(i) ? ' off' : ''}`} style={{ animationDelay: `${i * 60}ms` }}>

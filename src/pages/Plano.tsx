@@ -18,7 +18,7 @@ const RECURSOS: [string, string, string][] = [
   ['Votações ao vivo', 'até 15', 'até 50'],
   ['Partidas e jogadores', 'sem limite', 'sem limite'],
   ['Relatórios e CSV', 'sim', 'sim'],
-  ['Gerar quiz com IA (tema ou material)', 'não', '25 por mês'],
+  ['Gerar quiz com IA (tema ou material)', '3 para experimentar', '25 por mês'],
 ]
 
 export default function Plano() {

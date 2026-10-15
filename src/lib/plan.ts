@@ -6,7 +6,7 @@ export type Plano = {
   limits: { quizzes: number; votacoes: number; ia: number }
   quizzes: number
   votacoes: number
-  ia: { enabled: boolean; limit: number; used: number }
+  ia: { enabled: boolean; limit: number; used: number; periodo?: 'mes' | 'total' }
   assinatura: { status: string; fim: string | null; cancela: boolean } | null
 }
 

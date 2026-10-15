@@ -327,7 +327,7 @@ export default function Home() {
 
       <section className="section" id="planos">
         <div className="section-in">
-          <Reveal><span className="kicker">Planos</span><h2 className="h2x">Comece grátis. Assine quando quiser a IA</h2>
+          <Reveal><span className="kicker">Planos</span><h2 className="h2x">Comece grátis. Assine quando quiser mais IA</h2>
             <p className="lead2">Partidas e jogadores não têm limite em nenhum plano. O Pro libera a geração de quizzes com IA e mais espaço para guardar seus quizzes e votações.</p></Reveal>
           <div className="price-grid">
             <Reveal className="price-card">
@@ -339,7 +339,7 @@ export default function Home() {
                 <li>Até 15 votações ao vivo</li>
                 <li>Partidas e jogadores sem limite</li>
                 <li>Relatórios e planilha CSV</li>
-                <li className="off">Gerar quiz com IA</li>
+                <li>3 quizzes gerados com IA para experimentar</li>
               </ul>
               <Link to={session ? '/painel' : '/criar-conta'} className="qz-btn qz-btn--secondary qz-btn--lg">{session ? 'Ir para meus quizzes' : 'Criar conta grátis'}</Link>
             </Reveal>

@@ -4,6 +4,7 @@ import { limiteMsg } from '../lib/plan'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/auth'
 import { randomCode } from '../lib/poll'
+import AppShell from '../lib/AppShell'
 
 type Poll = { id: string; title: string; code: string; updated_at: string; poll_questions: { count: number }[] }
 
@@ -51,23 +52,8 @@ export default function Votacoes() {
   }
 
   return (
-    <div className="page">
-      <header className="topbar">
-        <Link to="/" className="wordmark"><picture><source srcSet="/logo-wordmark-light.png" media="(prefers-color-scheme: dark)" /><img src="/logo-wordmark.png" alt="Quizuu" /></picture></Link>
-        <div className="btn-row" style={{ alignItems: 'center' }}>
-          <span className="muted" style={{ fontSize: 14 }}>{session?.user.email}</span>
-          <button className="qz-btn qz-btn--ghost" onClick={() => supabase.auth.signOut()}>Sair</button>
-        </div>
-      </header>
-      <main className="content" style={{ display: 'grid', gap: 'var(--space-6)', alignContent: 'start' }}>
-        <PanelTabs active="votacoes" />
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
-          <div>
-            <h1 style={{ fontSize: 32 }}>Votações</h1>
-            <p className="muted" style={{ margin: '4px 0 0' }}>Perguntas para a plateia votar pelo celular, com o resultado ao vivo na sua apresentação.</p>
-          </div>
-          <button className="qz-btn qz-btn--primary" onClick={nova} disabled={busy}>{busy ? 'Criando…' : 'Nova votação'}</button>
-        </div>
+    <AppShell title="Votações" actions={<button className="qz-btn qz-btn--primary" onClick={nova} disabled={busy}>{busy ? 'Criando…' : 'Nova votação'}</button>}>
+        <p className="muted" style={{ margin: 0 }}>Perguntas para a plateia votar pelo celular, com o resultado ao vivo na sua apresentação.</p>
         {error && <p className="notice notice--err">{error}</p>}
         {polls === null ? <p className="muted">Carregando…</p> : polls.length === 0 ? (
           <div className="card empty">
@@ -100,7 +86,6 @@ export default function Votacoes() {
             ))}
           </div>
         )}
-      </main>
-    </div>
+    </AppShell>
   )
 }

@@ -28,6 +28,7 @@ createRoot(document.getElementById('root')!).render(
           <Route path="/criar-conta" element={<Login key="criar" initial="criar" />} />
           <Route path="/jogar" element={<Jogar />} />
           <Route path="/painel" element={<RequireAuth><Painel /></RequireAuth>} />
+          <Route path="/painel/:secao" element={<RequireAuth><Painel /></RequireAuth>} />
           <Route path="/quiz/:id" element={<RequireAuth><Editor /></RequireAuth>} />
           <Route path="/gerar" element={<RequireAuth><Gerar /></RequireAuth>} />
           <Route path="/relatorio/:sessionId" element={<RequireAuth><Relatorio /></RequireAuth>} />
