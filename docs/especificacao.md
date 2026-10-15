@@ -38,8 +38,11 @@ Tempo medido no servidor (chegada da resposta menos abertura da pergunta).
 - LGPD: jogador anônimo; dados de partida apagáveis.
 - Acessibilidade: cor sempre acompanhada de forma; fonte grande.
 
+## Decisões tomadas
+- Público principal: eventos e escolas.
+- Identidade: design system em docs/design-system (vermelho, laranja, amarelo e roxo, cada cor com sua forma).
+
 ## Decisões em aberto
-- Público principal (escolas, eventos, empresas).
-- Identidade visual.
+- Logo.
 - Produto pago ou ferramenta interna.
 - Domínio.
