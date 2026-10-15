@@ -153,6 +153,7 @@ export default function Home() {
           <nav className="home-nav">
             <a href="#como-funciona" className="nav-link">Como funciona</a>
             <a href="#votacoes" className="nav-link">Votações</a>
+            <a href="#planos" className="nav-link">Planos</a>
             <Link to="/jogar" className="nav-link">Tenho um PIN</Link>
             {session
               ? <Link to="/painel" className="qz-btn qz-btn--primary">Meus quizzes</Link>
@@ -301,7 +302,7 @@ export default function Home() {
             <Reveal className="stat"><strong><CountUp to={200} /></strong><span>jogadores numa mesma sala, testados ao mesmo tempo</span></Reveal>
             <Reveal className="stat" delay={100}><strong><CountUp to={0.2} decimals={1} suffix=" s" /></strong><span>para a resposta chegar ao servidor</span></Reveal>
             <Reveal className="stat" delay={200}><strong><CountUp to={0} /></strong><span>apps para instalar. Basta o navegador</span></Reveal>
-            <Reveal className="stat" delay={300}><strong>R$ <CountUp to={0} /></strong><span>para criar e jogar quantos quizzes quiser</span></Reveal>
+            <Reveal className="stat" delay={300}><strong>R$ <CountUp to={0} /></strong><span>para começar: até 15 quizzes e 15 votações no plano Grátis</span></Reveal>
           </div>
         </div>
       </section>
@@ -319,6 +320,43 @@ export default function Home() {
               <div className="aud2-icon qz-answer--purple"><Shape index={3} /></div>
               <h3>Eventos e palestras</h3>
               <p>Aqueça a plateia, teste o que ficou da apresentação e anime o intervalo. O QR code no telão leva cada pessoa direto para a sala.</p>
+            </Reveal>
+          </div>
+        </div>
+      </section>
+
+      <section className="section" id="planos">
+        <div className="section-in">
+          <Reveal><span className="kicker">Planos</span><h2 className="h2x">Comece grátis. Assine quando quiser a IA</h2>
+            <p className="lead2">Partidas e jogadores não têm limite em nenhum plano. O Pro libera a geração de quizzes com IA e mais espaço para guardar seus quizzes e votações.</p></Reveal>
+          <div className="price-grid">
+            <Reveal className="price-card">
+              <h3>Grátis</h3>
+              <p className="price-val">R$ 0</p>
+              <p className="price-sub">Para testar e usar em turmas e eventos menores.</p>
+              <ul>
+                <li>Até 15 quizzes</li>
+                <li>Até 15 votações ao vivo</li>
+                <li>Partidas e jogadores sem limite</li>
+                <li>Relatórios e planilha CSV</li>
+                <li className="off">Gerar quiz com IA</li>
+              </ul>
+              <Link to={session ? '/painel' : '/criar-conta'} className="qz-btn qz-btn--secondary qz-btn--lg">{session ? 'Ir para meus quizzes' : 'Criar conta grátis'}</Link>
+            </Reveal>
+            <Reveal className="price-card price-card--pro" delay={120}>
+              <span className="price-tag">Com IA</span>
+              <h3>Pro</h3>
+              <p className="price-val">R$ 25<span>/mês</span></p>
+              <p className="price-sub">Para quem cria conteúdo toda semana.</p>
+              <ul>
+                <li>Até 50 quizzes</li>
+                <li>Até 50 votações ao vivo</li>
+                <li>Partidas e jogadores sem limite</li>
+                <li>Relatórios e planilha CSV</li>
+                <li><strong>25 quizzes por mês gerados com IA</strong>, a partir de um tema ou de um material seu (PDF, texto ou imagem)</li>
+              </ul>
+              <Link to={session ? '/plano' : '/criar-conta'} className="qz-btn qz-btn--primary qz-btn--lg">Assinar o Pro</Link>
+              <p className="price-note">Pagamento pelo Stripe. Cancele quando quiser, sem multa.</p>
             </Reveal>
           </div>
         </div>
@@ -345,6 +383,7 @@ export default function Home() {
               <h4>Produto</h4>
               <a href="#como-funciona">Como funciona</a>
               <a href="#votacoes">Votações ao vivo</a>
+              <a href="#planos">Planos</a>
               <Link to="/criar-conta">Criar conta grátis</Link>
               <Link to="/entrar">Entrar</Link>
             </nav>
