@@ -35,6 +35,10 @@ export default function Jogar() {
   useEffect(() => {
     const saved = loadPlayer()
     if (!saved) return
+    // QR code ou link de outra sala: descarta a entrada antiga e entra na nova
+    const urlPin = params.get('pin')?.replace(/\D/g, '').slice(0, 6)
+    const velho = !saved.at || Date.now() - saved.at > 12 * 3600 * 1000
+    if ((urlPin && urlPin !== saved.pin) || velho) { savePlayer(null); return }
     supabase.rpc('rejoin_session', { p_player_id: saved.playerId, p_token: saved.token }).then(({ data }) => {
       const row = data?.[0]
       if (row && !row.kicked && row.status !== 'finished') setMe(saved)
@@ -93,7 +97,7 @@ export default function Jogar() {
       if (key === 'pin_nao_encontrado' || key === 'partida_em_andamento') setStep('pin')
       return
     }
-    const p = { playerId: data[0].player_id, token: data[0].reconnect_token, sessionId: data[0].session_id, nickname: nick.trim() }
+    const p = { playerId: data[0].player_id, token: data[0].reconnect_token, sessionId: data[0].session_id, nickname: nick.trim(), pin, at: Date.now() }
     savePlayer(p); setMe(p); setState({ phase: 'lobby' })
   }
 

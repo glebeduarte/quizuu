@@ -11,7 +11,7 @@ export type GameState =
 
 export const channelFor = (sessionId: string) => supabase.channel(`sala:${sessionId}`, { config: { broadcast: { self: false } } })
 
-export type PlayerSave = { playerId: string; token: string; sessionId: string; nickname: string }
+export type PlayerSave = { playerId: string; token: string; sessionId: string; nickname: string; pin?: string; at?: number }
 const KEY = 'quizuu:jogador'
 export const loadPlayer = (): PlayerSave | null => { try { return JSON.parse(localStorage.getItem(KEY) || 'null') } catch { return null } }
 export const savePlayer = (p: PlayerSave | null) => { try { p ? localStorage.setItem(KEY, JSON.stringify(p)) : localStorage.removeItem(KEY) } catch { /* sem armazenamento */ } }
