@@ -1,9 +1,29 @@
 {
   "rewrites": [
-    { "source": "/embed/:code", "destination": "/api/embed?code=:code" },
-    { "source": "/((?!api/).*)", "destination": "/index.html" }
+    {
+      "source": "/embed/:code",
+      "destination": "/api/embed?code=:code"
+    },
+    {
+      "source": "/((?!api/).*)",
+      "destination": "/index.html"
+    }
   ],
   "headers": [
-    { "source": "/v/(.*)", "headers": [{ "key": "Content-Security-Policy", "value": "frame-ancestors *" }] }
+    {
+      "source": "/v/(.*)",
+      "headers": [
+        {
+          "key": "Content-Security-Policy",
+          "value": "frame-ancestors *"
+        }
+      ]
+    }
+  ],
+  "crons": [
+    {
+      "path": "/api/keepalive",
+      "schedule": "0 12 * * *"
+    }
   ]
 }

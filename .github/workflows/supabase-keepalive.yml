@@ -1,0 +1,21 @@
+# Reserva do keepalive: consulta o banco a cada 3 dias para o Supabase não pausar.
+name: Supabase keepalive
+on:
+  schedule:
+    - cron: '17 9 */3 * *'
+  workflow_dispatch:
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Consulta o banco
+        run: |
+          code=$(curl -s -o /tmp/r.txt -w "%{http_code}" -X POST \
+            "https://ekdffjubkhsrmoprsylw.supabase.co/rest/v1/rpc/is_admin" \
+            -H "apikey: sb_publishable_G9IOb70jywn8RlNjh3kIoA_Pata2ONt" \
+            -H "Authorization: Bearer sb_publishable_G9IOb70jywn8RlNjh3kIoA_Pata2ONt" \
+            -H "Content-Type: application/json" -d '{}')
+          echo "Supabase respondeu $code: $(cat /tmp/r.txt)"
+          test "$code" = "200"
+      - name: Confere também pelo site
+        run: curl -fsS https://quizuubr.vercel.app/api/keepalive
