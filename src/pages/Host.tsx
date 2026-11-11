@@ -263,7 +263,7 @@ export default function Host() {
         <main className="content narrow-wide">
           <h1 className="stage-title">Pódio</h1>
           <div className="podium">
-            {[1, 0, 2].map((rank) => players[rank] && (
+            {[3, 1, 0, 2, 4].map((rank) => players[rank] && (
               <div key={rank} className={`podium-col p${rank + 1}`}>
                 <strong className="podium-name">{players[rank].nickname}</strong>
                 <span>{formatPoints(players[rank].score)} pts</span>
