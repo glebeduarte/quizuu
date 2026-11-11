@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { QRCodeCanvas } from 'qrcode.react'
 import { supabase } from '../lib/supabase'
+import AppShell from '../lib/AppShell'
 import { ANSWER, Shape } from '../lib/shapes'
 import { pollChannel, screenUrl, voteUrl } from '../lib/poll'
 
@@ -132,15 +133,14 @@ export default function VotacaoEditor() {
   const ready = qs.every((q) => q.prompt.trim() && (q.kind === 'words' || q.options.filter((o) => o.trim()).length >= 2))
 
   return (
-    <div className="page">
-      <header className="topbar editor-top">
-        <Link to="/votacoes" className="qz-btn qz-btn--ghost" style={{ paddingLeft: 0 }}>← Votações</Link>
-        <input className="input title-input" aria-label="Título da votação" value={title} maxLength={120} onChange={(e) => { setTitle(e.target.value); setDirty(true) }} />
-        <div className="btn-row" style={{ alignItems: 'center' }}>
+    <AppShell title="Editar votação" actions={<div className="btn-row shell-save" style={{ alignItems: 'center' }}>
           <span className="muted save-state">{saving ? 'Salvando…' : dirty ? 'Alterações não salvas' : 'Tudo salvo'}</span>
           <button className="qz-btn qz-btn--primary" onClick={save} disabled={saving || !dirty}>Salvar</button>
-        </div>
-      </header>
+        </div>}>
+      <div className="edit-head">
+        <Link to="/votacoes" className="edit-back">← Votações</Link>
+        <input className="input title-input edit-title" aria-label="Título da votação" value={title} maxLength={120} onChange={(e) => { setTitle(e.target.value); setDirty(true) }} />
+      </div>
       <main className="content" style={{ display: 'grid', gap: 'var(--space-6)' }}>
         <div className="seg" role="tablist">
           <button role="tab" aria-selected={tab === 'perguntas'} className={tab === 'perguntas' ? 'on' : ''} onClick={() => setTab('perguntas')}>Perguntas</button>
@@ -288,6 +288,6 @@ export default function VotacaoEditor() {
           </div>
         )}
       </main>
-    </div>
+    </AppShell>
   )
 }

@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { ANSWER, Shape } from '../lib/shapes'
 import { saveQuiz } from '../lib/saveQuiz'
+import AppShell from '../lib/AppShell'
 
 type Option = { id: string; label: string; is_correct: boolean }
 type Kind = 'multiple_choice' | 'true_false'
@@ -114,16 +115,15 @@ export default function Editor() {
   if (loading) return <div className="page"><div className="center muted">Carregando quiz…</div></div>
 
   return (
-    <div className="page editor-page">
-      <header className="topbar editor-top">
-        <Link to="/painel" className="qz-btn qz-btn--ghost" style={{ paddingLeft: 0 }}>← Meus quizzes</Link>
-        <input className="input title-input" aria-label="Título do quiz" value={title} maxLength={120}
-          onChange={(e) => { setTitle(e.target.value); setDirty(true) }} />
-        <div className="btn-row" style={{ alignItems: 'center' }}>
+    <AppShell title="Editar quiz" actions={<div className="btn-row shell-save" style={{ alignItems: 'center' }}>
           <span className="muted save-state">{saving ? 'Salvando…' : dirty ? 'Alterações não salvas' : 'Tudo salvo'}</span>
           <button className="qz-btn qz-btn--primary" onClick={save} disabled={saving || !dirty}>Salvar</button>
-        </div>
-      </header>
+        </div>}>
+      <div className="edit-head">
+        <Link to="/painel/quizzes" className="edit-back">← Meus quizzes</Link>
+        <input className="input title-input edit-title" aria-label="Título do quiz" value={title} maxLength={120}
+          onChange={(e) => { setTitle(e.target.value); setDirty(true) }} />
+      </div>
 
       {notice && <p className={`notice notice--${notice.kind} content`} style={{ marginBottom: 16 }}>{notice.text}</p>}
 
@@ -242,6 +242,6 @@ export default function Editor() {
       <p className="content muted" style={{ fontSize: 14, marginTop: 16 }}>
         {ready ? `Pronto para jogar: ${questions.length} perguntas.` : 'Perguntas com ! ainda não estão prontas para jogar. Você pode salvar mesmo assim.'}
       </p>
-    </div>
+    </AppShell>
   )
 }
