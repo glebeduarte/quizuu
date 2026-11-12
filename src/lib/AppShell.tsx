@@ -36,8 +36,9 @@ export default function AppShell({ title, actions, children }: { title: string; 
 
   return (
     <div className="adm shell">
+      <div className="shell-blobs" aria-hidden="true"><i /><i /><i /><i /></div>
       <aside className={`adm-side${aberto ? ' aberto' : ''}`}>
-        <Link to="/" className="adm-logo"><img src="/logo-wordmark-light.png" alt="Quizuu" /></Link>
+        <Link to="/" className="adm-logo"><img className="logo-claro" src="/logo-wordmark.png" alt="Quizuu" /><img className="logo-escuro" src="/logo-wordmark-light.png" alt="" /></Link>
         <nav aria-label="Menu principal">
           {NAV.map((n) => (
             <NavLink key={n.to} to={n.to} end={n.end} className={({ isActive }) => `adm-nav${isActive ? ' on' : ''}`}>
