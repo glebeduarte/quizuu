@@ -6,7 +6,7 @@ import { randomPin } from '../lib/game'
 import { limiteMsg } from '../lib/plan'
 import AppShell from '../lib/AppShell'
 
-type Partida = { id: string; created_at: string; finished_at: string | null; status: string; quiz_id: string; quizzes: { title: string } | null; players: { count: number }[] }
+type Partida = { id: string; pin?: string; created_at: string; finished_at: string | null; status: string; quiz_id: string; quizzes: { title: string } | null; players: { count: number }[] }
 type Quiz = { id: string; title: string; updated_at: string; questions: { count: number }[] }
 type Poll = { id: string; title: string; code: string; updated_at: string; poll_questions: { count: number }[]; poll_votes: { count: number }[] }
 
@@ -34,7 +34,7 @@ export default function Painel() {
   useEffect(() => {
     supabase.from('quizzes').select('id,title,updated_at,questions(count)').order('updated_at', { ascending: false })
       .then(({ data }) => setQuizzes((data as Quiz[]) ?? []))
-    supabase.from('sessions').select('id,created_at,finished_at,status,quiz_id,quizzes(title),players(count)').order('created_at', { ascending: false }).limit(200)
+    supabase.from('sessions').select('id,pin,created_at,finished_at,status,quiz_id,quizzes(title),players(count)').order('created_at', { ascending: false }).limit(200)
       .then(({ data }) => setPartidas(((data ?? []) as unknown as Partida[]).filter((p) => p.status !== 'lobby' || jog(p) > 0)))
     supabase.from('polls').select('id,title,code,updated_at,poll_questions(count),poll_votes(count)').order('updated_at', { ascending: false })
       .then(({ data, error }) => {
@@ -191,63 +191,100 @@ export default function Painel() {
   )
 
   // Início
+  const SH = [
+    ['var(--answer-red)', 'var(--answer-orange)', 'var(--answer-yellow)', 'var(--answer-purple)'],
+    ['var(--answer-purple)', 'var(--answer-yellow)', 'var(--answer-orange)', 'var(--answer-red)'],
+    ['var(--answer-yellow)', 'var(--answer-red)', 'var(--answer-purple)', 'var(--answer-orange)'],
+    ['var(--answer-orange)', 'var(--answer-purple)', 'var(--answer-red)', 'var(--answer-yellow)'],
+  ]
+  const hora = new Date().getHours()
+  const saudacao = hora < 12 ? 'Bom dia' : hora < 18 ? 'Boa tarde' : 'Boa noite'
+  const aberta = (partidas ?? []).find((p) => p.status !== 'finished')
+  const rascunhos = (quizzes ?? []).filter((q) => !(q.questions[0]?.count)).length
+  const [aba, setAba] = [ordem, setOrdem]
+  const recentes = aba === 'jogados' ? lista.slice(0, 5) : (quizzes ?? []).filter((q) => aba !== 'nome' || !q.questions[0]?.count).slice(0, 5)
+  const pinFmt = (p?: string) => p ? `${p.slice(0, 3)} ${p.slice(3)}` : ''
+
   return (
     <AppShell title="Início" actions={novoQuizBtn}>
       {erroBox}
-      <div className="p-hello">
-        <h2>Olá{nome ? `, ${nome}` : ''}.</h2>
-        <p className="muted">O que vamos colocar no telão hoje?</p>
-      </div>
-      <div className="p-acoes">
-        <button className="p-acao qz-answer--red" onClick={novo} disabled={creating}><Icon d="M12 5v14M5 12h14" /><strong>Novo quiz</strong><span>Monte as perguntas à mão</span></button>
-        <Link to="/gerar" className="p-acao qz-answer--orange"><Icon d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z" /><strong>Gerar com IA</strong><span>A partir de um tema ou material</span></Link>
-        <Link to="/votacoes" className="p-acao qz-answer--yellow"><Icon d="M4 6h10M4 12h16M4 18h7" /><strong>Nova votação</strong><span>Enquete ou nuvem de palavras</span></Link>
-        <Link to="/painel/relatorios" className="p-acao qz-answer--purple"><Icon d="M4 20V10M10 20V4M16 20v-7M22 20H2" /><strong>Relatórios</strong><span>Resultados das partidas</span></Link>
-      </div>
-      <div className="kpis">
-        <div className="kpi"><strong>{quizzes?.length ?? '…'}</strong><span>quizzes</span></div>
-        <div className="kpi"><strong>{partidas?.length ?? '…'}</strong><span>partidas jogadas</span></div>
-        <div className="kpi"><strong>{totalJogadores}</strong><span>jogadores alcançados</span></div>
-        <div className="kpi"><strong>{polls.length}</strong><span>votações · {totalVotos} votos</span></div>
-      </div>
-      <div className="adm-grid2">
-        <div className="card adm-card">
-          <div className="adm-card__head"><h2>Quizzes recentes</h2><Link to="/painel/quizzes">Ver todos</Link></div>
-          {quizzes && quizzes.length === 0 && <p className="muted" style={{ margin: 0 }}>Nenhum quiz ainda.</p>}
-          <ul className="adm-lista">
-            {(quizzes ?? []).slice(0, 5).map((q) => (
-              <li key={q.id}>
-                <Link to={`/quiz/${q.id}`}>{q.title}</Link>
-                <button className="qz-btn qz-btn--ghost p-mini" disabled={!q.questions[0]?.count} onClick={() => jogar(q.id)}>Jogar</button>
-              </li>
-            ))}
-          </ul>
+      <section className="pi-hello">
+        <div>
+          <h2>{saudacao}{nome ? `, ${nome}` : ''}!</h2>
+          <p>{aberta ? 'Você tem uma sala aberta' : 'Nenhuma sala aberta agora'}{rascunhos ? ` e ${rascunhos} ${rascunhos === 1 ? 'rascunho esperando' : 'rascunhos esperando'}` : ''}.</p>
         </div>
-        <div className="card adm-card">
-          <div className="adm-card__head"><h2>Últimas partidas</h2><Link to="/painel/relatorios">Ver relatórios</Link></div>
-          {partidas && partidas.length === 0 && <p className="muted" style={{ margin: 0 }}>Nenhuma partida ainda.</p>}
-          <ul className="adm-lista">
-            {(partidas ?? []).slice(0, 5).map((p) => (
-              <li key={p.id}>
-                <span>{p.quizzes?.title ?? 'Quiz excluído'} <em className="muted p-sub">{fmt(p.created_at)} · {jog(p)} jogadores</em></span>
-                <Link to={p.status === 'finished' ? `/relatorio/${p.id}` : `/host/${p.id}`}>{p.status === 'finished' ? 'Relatório' : 'Retomar'}</Link>
-              </li>
-            ))}
-          </ul>
+      </section>
+
+      <section className="pi-acoes">
+        <button className="pi-acao" onClick={novo} disabled={creating}>
+          <span className="pi-ico" style={{ background: 'var(--answer-orange)' }}><svg viewBox="0 0 24 24"><path d="M12 2 22 12 12 22 2 12z" /></svg></span>
+          <h3>Quiz do zero</h3><p>Monte as perguntas, defina o tempo e jogue ao vivo com o PIN.</p>
+          <span className="pi-go" style={{ color: 'var(--answer-orange)' }}>{creating ? 'Criando…' : 'Começar →'}</span>
+        </button>
+        <Link to="/gerar" className="pi-acao">
+          <span className="pi-ico" style={{ background: 'var(--answer-purple)' }}><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" /></svg></span>
+          <h3>Gerar com IA</h3><p>Envie um PDF ou escreva o tema e a IA monta as perguntas.</p>
+          <span className="pi-go" style={{ color: 'var(--answer-purple)' }}>Gerar →</span>
+        </Link>
+        <Link to="/votacoes" className="pi-acao">
+          <span className="pi-ico" style={{ background: 'var(--answer-yellow)', color: '#22103a' }}><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /></svg></span>
+          <h3>Votação ao vivo</h3><p>Enquete, nuvem de palavras e escala, com resultado no telão.</p>
+          <span className="pi-go" style={{ color: '#a87400' }}>Criar →</span>
+        </Link>
+      </section>
+
+      <section className="pi-stats">
+        <div className="pi-stat"><i className="pi-dot pi-dot--tri" /><strong>{partidas?.length ?? '…'}</strong><span>partidas jogadas</span></div>
+        <div className="pi-stat"><i className="pi-dot pi-dot--dia" /><strong>{totalJogadores.toLocaleString('pt-BR')}</strong><span>jogadores no total</span></div>
+        <div className="pi-stat"><i className="pi-dot pi-dot--cir" /><strong>{quizzes?.length ?? '…'}</strong><span>quizzes criados</span></div>
+        <div className="pi-stat"><i className="pi-dot pi-dot--sq" /><strong>{polls.length}</strong><span>votações · {totalVotos} votos</span></div>
+      </section>
+
+      <section className="pi-row">
+        <div className="pi-panel">
+          <div className="pi-panel__head">
+            <h2>Seus quizzes</h2>
+            <div className="pi-chips">
+              {([['recentes', 'Recentes'], ['nome', 'Rascunhos'], ['jogados', 'Mais jogados']] as const).map(([k, l]) => (
+                <button key={k} className={aba === k ? 'on' : ''} onClick={() => setAba(k)}>{l}</button>
+              ))}
+            </div>
+          </div>
+          {quizzes && recentes.length === 0 && <p className="muted">Nada por aqui ainda.</p>}
+          {recentes.map((q, i) => {
+            const n = q.questions[0]?.count ?? 0
+            const ao = aberta?.quiz_id === q.id
+            return (
+              <div className="pi-quiz" key={q.id}>
+                <div className="pi-thumb">{SH[i % 4].map((c, k) => <b key={k} style={{ background: c }} />)}</div>
+                <Link to={`/quiz/${q.id}`} className="pi-quiz__txt"><h4>{q.title}</h4><small>{n} {n === 1 ? 'pergunta' : 'perguntas'} · editado em {fmt(q.updated_at)}</small></Link>
+                <span className={`pi-tag ${ao ? 'live' : n ? 'ok' : 'draft'}`}>{ao ? 'Ao vivo' : n ? 'Pronto' : 'Rascunho'}</span>
+                {n ? <button className="pi-btn sm" onClick={() => jogar(q.id)}>Jogar</button>
+                   : <Link to={`/quiz/${q.id}`} className="pi-btn ghost sm">Editar</Link>}
+              </div>
+            )
+          })}
+          <Link to="/painel/quizzes" className="pi-vertodos">Ver todos os quizzes →</Link>
         </div>
-        <div className="card adm-card">
-          <div className="adm-card__head"><h2>Votações</h2><Link to="/votacoes">Ver todas</Link></div>
-          {polls.length === 0 && <p className="muted" style={{ margin: 0 }}>Nenhuma votação ainda.</p>}
-          <ul className="adm-lista">
-            {polls.slice(0, 5).map((p) => (
-              <li key={p.id}>
-                <Link to={`/votacao/${p.id}`}>{p.title}</Link>
-                <span className="muted">{p.poll_votes?.[0]?.count ?? 0} votos · {p.code}</span>
-              </li>
-            ))}
-          </ul>
+
+        <div className="pi-sala">
+          {aberta ? (<>
+            <h2>Sala aberta</h2>
+            <p>{aberta.quizzes?.title ?? 'Quiz'}</p>
+            <div className="pi-sala__label">PIN do jogo</div>
+            <div className="pi-pin">{pinFmt(aberta.pin)}</div>
+            <p className="pi-sala__n">{jog(aberta)} {jog(aberta) === 1 ? 'jogador' : 'jogadores'} na sala</p>
+            <Link to={`/host/${aberta.id}`} className="pi-btn full">Abrir telão e continuar</Link>
+          </>) : (<>
+            <h2>Nenhuma sala aberta</h2>
+            <p>Escolha um quiz pronto e abra a sala. O PIN aparece aqui e no telão.</p>
+            <div className="pi-pin pi-pin--vazio">· · ·</div>
+            {(quizzes ?? []).find((q) => q.questions[0]?.count)
+              ? <button className="pi-btn full" onClick={() => jogar((quizzes ?? []).find((q) => q.questions[0]?.count)!.id)}>Jogar o último quiz</button>
+              : <button className="pi-btn full" onClick={novo}>Criar um quiz</button>}
+          </>)}
         </div>
-      </div>
+      </section>
     </AppShell>
   )
 }
