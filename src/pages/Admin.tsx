@@ -167,9 +167,10 @@ export default function Admin() {
   const titulo = MENU.find((m) => m.id === secao)?.label ?? 'Visão geral'
 
   return (
-    <div className="adm">
+    <div className="adm shell">
+      <div className="shell-blobs" aria-hidden="true"><i /><i /><i /><i /></div>
       <aside className={`adm-side${menuAberto ? ' aberto' : ''}`}>
-        <Link to="/" className="adm-logo"><img src="/logo-wordmark-light.png" alt="Quizuu" /></Link>
+        <Link to="/" className="adm-logo"><img src="/logo-wordmark.png" alt="Quizuu" /></Link>
         <span className="adm-side__label">Administração</span>
         <nav aria-label="Seções do admin">
           {MENU.map((m) => (

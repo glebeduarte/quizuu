@@ -810,3 +810,20 @@ input[type=range] { accent-color: var(--brand); width: 100%; height: 52px; }
   .pi-stat strong { font-size: 34px; }
 }
 @media (prefers-reduced-motion: reduce) { .pi-acao, .pi-btn { transition: none; } }
+
+/* ===== vidro nos números, tabelas e filtros (Início, Relatórios, Admin) ===== */
+.shell .kpi { background: var(--glass); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur); border: 1.5px solid var(--glass-edge); box-shadow: var(--glass-shadow); border-radius: 28px; padding: 24px; gap: 6px; }
+.shell .kpi strong { font-size: 40px; }
+.shell .kpi--destaque { background: rgba(61,18,120,.88); color: #fff; border-color: rgba(255,255,255,.25); }
+.shell .kpis { gap: 24px; }
+.shell .adm-side__label { color: var(--ink-muted); opacity: 1; }
+.shell .adm-card__head h2, .shell .admin-sec h2 { font-size: 24px; }
+.shell .adm-lista li, .shell .admin-tabela th, .shell .admin-tabela td, .shell .admin-bloco dl div, .shell .adm-drawer__sec { border-color: rgba(61,18,120,.08); }
+.shell .admin-tabela th { text-transform: none; letter-spacing: 0; font-size: 13px; }
+.shell .admin-tabela tbody tr:hover td { background: rgba(255,255,255,.6); }
+.shell .admin-chips button { border: 0; background: rgba(255,255,255,.6); }
+.shell .admin-chips button.on { background: var(--ink-strong); color: #fff; }
+.shell .adm-mini div { background: rgba(255,255,255,.7); border-radius: 16px; }
+.shell .adm-plano--free { background: rgba(61,18,120,.1); }
+.shell .adm-veu { background: rgba(34,16,58,.25); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
+@media (max-width: 900px) { .shell .kpi { padding: 18px; border-radius: 22px; } .shell .kpi strong { font-size: 30px; } }
