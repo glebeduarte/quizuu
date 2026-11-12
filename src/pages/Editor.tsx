@@ -3,6 +3,13 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { ANSWER, Shape } from '../lib/shapes'
 import { saveQuiz } from '../lib/saveQuiz'
+
+/** Faz o textarea crescer com o texto, para a resposta quebrar linha em vez de ser cortada. */
+function autoSize(el: HTMLTextAreaElement | null) {
+  if (!el) return
+  el.style.height = 'auto'
+  el.style.height = el.scrollHeight + 'px'
+}
 import AppShell from '../lib/AppShell'
 
 type Option = { id: string; label: string; is_correct: boolean }
@@ -209,9 +216,11 @@ export default function Editor() {
               {q.options.map((o, i) => (
                 <div key={o.id} className={`opt qz-answer--${ANSWER[i].key}${o.is_correct ? ' is-correct' : ''}`}>
                   <Shape index={i} />
-                  <input className="opt-input" value={o.label} maxLength={120} readOnly={q.kind === 'true_false'}
+                  <textarea className="opt-input" rows={1} value={o.label} maxLength={120} readOnly={q.kind === 'true_false'}
+                    ref={autoSize} onInput={(e) => autoSize(e.currentTarget)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault() }}
                     placeholder={`Resposta ${i + 1}${i >= 2 ? ' (opcional)' : ''}`} aria-label={`Resposta ${i + 1}, ${ANSWER[i].label}`}
-                    onChange={(e) => setOption(i, { label: e.target.value })} />
+                    onChange={(e) => setOption(i, { label: e.target.value.replace(/\n/g, ' ') })} />
                   <button className="opt-check" aria-pressed={o.is_correct} aria-label={`Marcar resposta ${i + 1} como certa`}
                     onClick={() => setOption(i, { is_correct: true })}>
                     {o.is_correct && <svg viewBox="0 0 24 24"><path d="M5 12.5 10 17 19 7" /></svg>}
