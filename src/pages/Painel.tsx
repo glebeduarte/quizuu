@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/auth'
-import { randomPin } from '../lib/game'
+import { channelFor, randomPin } from '../lib/game'
 import { limiteMsg } from '../lib/plan'
 import AppShell from '../lib/AppShell'
 
@@ -26,6 +26,8 @@ export default function Painel() {
   const [creating, setCreating] = useState(false)
   const [error, setError] = useState('')
   const [confirmId, setConfirmId] = useState<string | null>(null)
+  const [encerrarId, setEncerrarId] = useState<string | null>(null)
+  const [encerrando, setEncerrando] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [busca, setBusca] = useState('')
   const [ordem, setOrdem] = useState<'recentes' | 'nome' | 'jogados'>('recentes')
@@ -126,8 +128,35 @@ export default function Painel() {
     )
   }
 
+  // encerra uma partida que ficou aberta: grava como finalizada e manda os celulares para o pódio
+  async function encerrarPartida(id: string) {
+    setEncerrando(true)
+    const agora = new Date().toISOString()
+    const { error: e } = await supabase.from('sessions').update({ status: 'finished', finished_at: agora }).eq('id', id)
+    if (e) { setEncerrando(false); setError('Não foi possível encerrar a partida. Tente de novo.'); return }
+    const ch = channelFor(id)
+    await new Promise<void>((ok) => {
+      const t = setTimeout(ok, 3000)
+      ch.subscribe((st) => { if (st === 'SUBSCRIBED') { ch.send({ type: 'broadcast', event: 'state', payload: { phase: 'podium' } }).finally(() => { clearTimeout(t); ok() }) } })
+    })
+    supabase.removeChannel(ch)
+    setPartidas((ps) => (ps ?? []).map((x) => (x.id === id ? { ...x, status: 'finished', finished_at: agora } : x)))
+    setEncerrando(false); setEncerrarId(null)
+  }
+
   function LinhaPartida({ p }: { p: Partida }) {
     const fim = p.status === 'finished'
+    if (encerrarId === p.id) return (
+      <div className="match-row">
+        <div className="confirm-box" role="alert" style={{ width: '100%' }}>
+          <p>Encerrar a partida de “{p.quizzes?.title ?? 'Quiz excluído'}”? As perguntas que faltam não serão jogadas e o relatório fica com a pontuação atual.</p>
+          <div className="btn-row">
+            <button className="qz-btn qz-btn--secondary" onClick={() => setEncerrarId(null)} disabled={encerrando}>Cancelar</button>
+            <button className="qz-btn qz-btn--danger" onClick={() => encerrarPartida(p.id)} disabled={encerrando}>{encerrando ? 'Encerrando…' : 'Encerrar partida'}</button>
+          </div>
+        </div>
+      </div>
+    )
     return (
       <div className="match-row">
         <div style={{ display: 'grid', gap: 2, minWidth: 0 }}>
@@ -137,7 +166,10 @@ export default function Painel() {
         <div className="btn-row" style={{ alignItems: 'center' }}>
           <span className={`p-status${fim ? ' ok' : ''}`}>{fim ? 'Finalizada' : 'Em andamento'}</span>
           {fim ? <Link to={`/relatorio/${p.id}`} className="qz-btn qz-btn--secondary" style={{ textDecoration: 'none' }}>Ver relatório</Link>
-               : <Link to={`/host/${p.id}`} className="qz-btn qz-btn--secondary" style={{ textDecoration: 'none' }}>Retomar</Link>}
+               : <>
+                   <Link to={`/host/${p.id}`} className="qz-btn qz-btn--secondary" style={{ textDecoration: 'none' }}>Retomar</Link>
+                   <button className="qz-btn qz-btn--ghost" onClick={() => setEncerrarId(p.id)}>Encerrar</button>
+                 </>}
         </div>
       </div>
     )

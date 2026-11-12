@@ -28,7 +28,10 @@ export default function Host() {
   const revealedFor = useRef(-1)
   const lastLeft = useRef(99)
   const prevCount = useRef(0)
+  const endingRef = useRef(false)
   const [soundOn, setSoundOn] = useState(false)
+  const [confirmEnd, setConfirmEnd] = useState(false)
+  const [ending, setEnding] = useState(false)
 
   // trilha de cada fase
   const phaseKey = state.phase + ('qIndex' in state ? state.qIndex : '')
@@ -105,12 +108,13 @@ export default function Host() {
 
   const reveal = useCallback(async () => {
     const s = stateRef.current
-    if (s.phase !== 'question' || revealedFor.current === s.qIndex) return
+    if (s.phase !== 'question' || revealedFor.current === s.qIndex || endingRef.current) return
     revealedFor.current = s.qIndex
     const q = questions[s.qIndex]
     await supabase.from('sessions').update({ status: 'reveal' }).eq('id', sessionId!)
     const { data } = await supabase.from('answers').select('option_id').eq('session_id', sessionId!).eq('question_id', q.id)
     const counts = q.options.map((o) => (data ?? []).filter((a) => a.option_id === o.id).length)
+    if (endingRef.current) return
     broadcast({ phase: 'reveal', qIndex: s.qIndex, total: s.total, optionIds: s.optionIds, correctIndex: q.options.findIndex((o) => o.is_correct), counts })
     loadPlayers()
   }, [questions, sessionId, broadcast, loadPlayers])
@@ -150,9 +154,21 @@ export default function Host() {
   }
 
   async function finish() {
-    await supabase.from('sessions').update({ status: 'finished', finished_at: new Date().toISOString() }).eq('id', sessionId!)
+    const { error } = await supabase.from('sessions').update({ status: 'finished', finished_at: new Date().toISOString() }).eq('id', sessionId!)
+    if (error) { setError('Não foi possível encerrar a partida. Tente de novo.'); return false }
     await loadPlayers()
     broadcast({ phase: 'podium' })
+    return true
+  }
+
+  // encerra a partida antes da última pergunta e leva todos ao pódio com a pontuação atual
+  async function endNow() {
+    setEnding(true); setError('')
+    endingRef.current = true // impede que o cronômetro revele a pergunta aberta enquanto encerra
+    const ok = await finish()
+    if (!ok) endingRef.current = false
+    setEnding(false)
+    if (ok) setConfirmEnd(false)
   }
 
   async function kick(p: Player) {
@@ -169,8 +185,27 @@ export default function Host() {
       <header className="topbar">
         <Link to="/painel" className="wordmark"><img src="/logo-wordmark-light.png" alt="Quizuu" /></Link>
         <span className="muted host-title">{title}{'qIndex' in state ? ` · ${state.qIndex + 1} de ${state.total}` : ''}</span>
-        <SoundToggle onEnable={() => setSoundOn(true)} />
+        <div className="host-tools">
+          {state.phase !== 'podium' && (
+            <button className="qz-btn qz-btn--ghost host-end" onClick={() => setConfirmEnd(true)}>Encerrar quiz</button>
+          )}
+          <SoundToggle onEnable={() => setSoundOn(true)} />
+        </div>
       </header>
+      {confirmEnd && state.phase !== 'podium' && (
+        <div className="end-overlay" role="dialog" aria-modal="true" aria-labelledby="end-title">
+          <div className="end-card">
+            <h2 id="end-title">Encerrar o quiz agora?</h2>
+            <p>{state.phase === 'lobby'
+              ? 'A sala será fechada e ninguém mais poderá entrar com este PIN.'
+              : `A partida termina na pergunta ${'qIndex' in state ? state.qIndex + 1 : ''} de ${questions.length}. As perguntas seguintes não serão jogadas e todos vão para o pódio com a pontuação atual. A pergunta aberta não conta pontos para quem ainda não respondeu.`}</p>
+            <div className="btn-row">
+              <button className="qz-btn qz-btn--secondary" onClick={() => setConfirmEnd(false)} disabled={ending}>Continuar jogando</button>
+              <button className="qz-btn qz-btn--danger" onClick={endNow} disabled={ending}>{ending ? 'Encerrando…' : 'Encerrar quiz'}</button>
+            </div>
+          </div>
+        </div>
+      )}
       {!soundOn && state.phase === 'lobby' && (
         <button className="sound-cta content" onClick={() => { unlock(); setSoundOn(true) }}>Toque aqui para ligar a música do telão</button>
       )}
